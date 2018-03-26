@@ -2,19 +2,37 @@
 # https://symfony.com/doc/current/security.html
 security:
 
+    encoders:
+        ScufBundle\Entity\User:
+            algorithm: bcrypt
+
     # https://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
     providers:
         in_memory:
             memory: ~
+        user_provider:
+            entity:
+                class: ScufBundle:User
+                property: username
 
     firewalls:
-        # disables authentication for assets and the profiler, adapt it according to your needs
+        secured_area:
+            anonymous: ~
+            form_login:
+                login_path: login
+                check_path: login
+            logout:
+                path: /logout
+                target: /
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
         main:
             anonymous: ~
+            pattern: ^/
+            http_basic: ~
+            provider: user_provider
             # activate different ways to authenticate
 
             # https://symfony.com/doc/current/security.html#a-configuring-how-your-users-will-authenticate
@@ -22,3 +40,13 @@ security:
 
             # https://symfony.com/doc/current/security/form_login_setup.html
             #form_login: ~
+
+    role_hierarchy:
+        ROLE_USER: ROLE_SALARIE
+        ROLE_MANAGER: ROLE_USER
+        ROLE_SUPERVISER: ROLE_USER
+        ROLE_ADMIN: [ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
+        ROLE_SUPER_ADMIN: [ROLE_ADMIN, ROLE_GOD]
+
+    access_control:
+        - { path: ^/create, roles: ROLE_SUPER_ADMIN }
