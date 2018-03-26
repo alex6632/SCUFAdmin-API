@@ -2,48 +2,66 @@
 
 namespace ScufBundle\Controller;
 
-use ScufBundle\Entity\Access;
-use ScufBundle\Form\AccessType;
+use ScufBundle\Entity\Setting;
+use ScufBundle\Form\SettingType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * @Route("/access")
+ * @Route("/setting")
  */
-class AccessController extends Controller
+class SettingController extends Controller
 {
 
     /**
-     * @Route("/create", name="createAccess")
+     * @Route("/create", name="createSetting")
      */
-    public function createAccessAction(Request $request)
+    public function createSettingAction(Request $request)
     {
         $em = $this->getDoctrine()->getEntityManager();
 
-        $access = new Access();
-        $createAccessForm = $this->createForm(AccessType::class, $access);
-        $createAccessForm->handleRequest($request);
+        $setting = new Setting();
+        $createSettingForm = $this->createForm(SettingType::class, $setting);
+        $createSettingForm->handleRequest($request);
 
         if($request->isXmlHttpRequest()) {
             $form = $request->request->all();
             //$form = $request->get('title');
+            $msg['type'] = 'success';
+
+            //var_dump($form['is_int']);
+            //die();
 
             if(empty($form['title'])) {
                 $msg = array(
                     'type'   => 'error',
-                    'debug'  => '[Error field is missing] [create|access|title] See AccessController/createAccessAction',
+                    'debug'  => '[Error field is missing] [create|setting|title] See SettingController/createSettingAction',
                     'msg'    => 'Le champs "titre" est obligatoire, veuillez le renseigner.'
                 );
-            } else {
-                $em->persist($access);
+            }
+            if(empty($form['value'])) {
+                $msg = array(
+                    'type'   => 'error',
+                    'debug'  => '[Error field is missing] [create|setting|value] See SettingController/createSettingAction',
+                    'msg'    => 'Le champs "valeur" est obligatoire, veuillez le renseigner.'
+                );
+            }
+            if(!empty($form['value']) && $form['is_int'] == 1) {
+                $form['value'] = intval($form['value']);
+            }
+
+            if($msg['type'] == 'success') {
+                $em->persist($setting);
                 $em->flush();
                 $msg = array(
                     'type'       => 'success',
-                    'msg'        => 'Le droit '.$form['title'].' a bien été ajouté.',
+                    'msg'        => 'Le réglage "'.$form['title'].'" a bien été ajouté.',
                     'title'      => $form['title'],
-                    'id'         => $access->getId(),
+                    'value'      => $form['value'],
+                    'is_int'     => $form['is_int'],
+                    'id'         => $setting->getId(),
                 );
             }
             return new JsonResponse($msg);
@@ -51,57 +69,74 @@ class AccessController extends Controller
 
         $msg = array(
             'type' => 'error',
-            'debug'  => '[Error] [create|access] See AccessController/createAccessAction',
-            'msg'  => 'Erreur lors de la création du droit. Veuillez réssayer.'
+            'debug'  => '[Error] [create|setting] See SettingController/createSettingAction',
+            'msg'  => 'Erreur lors de la création du réglage. Veuillez réssayer.'
         );
         return new JsonResponse($msg);
     }
 
     /**
-     * @Route("/delete/{id}", name="deleteAccess")
+     * @Route("/delete/{id}", name="deleteSetting")
      */
-    public function deleteAccessAction(Request $request, $id)
+    public function deleteSettingAction(Request $request, $id)
     {
         $em = $this->getDoctrine()->getEntityManager();
-        $access = $em->getRepository('ScufBundle:Access')->find($id);
-        $em->remove($access);
+        $setting = $em->getRepository('ScufBundle:Setting')->find($id);
+        $em->remove($setting);
         $em->flush();
 
         $msg = array(
             'type' => 'success',
-            'msg'  => 'Le droit a bien été supprimé.'
+            'msg'  => 'Le réglage a bien été supprimé.'
         );
         return new JsonResponse($msg);
     }
 
     /**
-     * @Route("/edit", name="editAccess")
+     * @Route("/edit/{id}", name="editSetting")
      */
-    public function editAccessAction(Request $request, $id)
+    public function editSettingAction(Request $request, $id)
     {
         $em = $this->getDoctrine()->getManager();
-        $access = $em->getRepository('ScufBundle:Access')->find($id);
+        $setting = $em->getRepository('ScufBundle:Setting')->find($id);
 
-        $editAccessForm = $this->createForm(AccessType::class, $access);
-        $editAccessForm->handleRequest($request);
+        $editSettingForm = $this->createForm(SettingType::class, $setting);
+        $editSettingForm->handleRequest($request);
 
         if($request->isXmlHttpRequest()) {
-            $form = $request->get('access');
+            $form = $request->request->all();
+            $msg['type'] = 'success';
 
             if(empty($form['title'])) {
                 $msg = array(
                     'type'   => 'error',
-                    'debug'  => '[Error field is missing] [edit|access|title] See AccessController/editAccessAction',
+                    'debug'  => '[Error field is missing] [edit|setting|title] See SettingController/editSettingAction',
                     'msg'    => 'Le champs "titre" est obligatoire, veuillez le renseigner.'
                 );
+            }
+            if(empty($form['value'])) {
+                $msg = array(
+                    'type'   => 'error',
+                    'debug'  => '[Error field is missing] [edit|setting|value] See SettingController/editSettingAction',
+                    'msg'    => 'Le champs "valeur" est obligatoire, veuillez le renseigner.'
+                );
+            }
+            if(!empty($form['value']) && $form['is_int'] == 1) {
+                $form['value'] = intval($form['value']);
             } else {
-                $em->persist($access);
+                $form['value'] = strval($form['value']);
+            }
+
+            if($msg['type'] == 'success') {
+                $em->persist($setting);
                 $em->flush();
                 $msg = array(
                     'type'       => 'success',
-                    'msg'        => 'Le droit '.$form['title'].' a bien été édité.',
+                    'msg'        => 'Le réglage "'.$form['title'].'" a bien été édité.',
                     'title'      => $form['title'],
-                    'id'         => $access->getId(),
+                    'value'      => $form['value'],
+                    'is_int'     => $form['is_int'],
+                    'id'         => $setting->getId(),
                 );
             }
             return new JsonResponse($msg);
@@ -109,8 +144,8 @@ class AccessController extends Controller
 
         $msg = array(
             'type' => 'error',
-            'debug'  => '[Error] [edit|access] See AccessController/editAccessAction',
-            'msg'  => "Erreur lors de l'édition du droit. Veuillez réssayer."
+            'debug'  => '[Error] [edit|setting] See SettingController/editSettingAction',
+            'msg'  => "Erreur lors de l'édition du réglage. Veuillez réssayer."
         );
         return new JsonResponse($msg);
     }
