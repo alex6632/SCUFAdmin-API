@@ -16,6 +16,24 @@ class SettingController extends Controller
 {
 
     /**
+     * @Route("/list", name="listSetting")
+     */
+    public function listSettingAction()
+    {
+        $em = $this->getDoctrine()->getEntityManager();
+        $settingList = $em->getRepository('ScufBundle:Setting')->findAll();
+        $response = array();
+        foreach ($settingList as $list) {
+            $response[] = array(
+                'title' => $list->getTitle(),
+                'value' => $list->getValue(),
+                'id' => $list->getId(),
+            );
+        }
+        return new JsonResponse($response);
+    }
+
+    /**
      * @Route("/create", name="createSetting")
      */
     public function createSettingAction(Request $request)
@@ -107,13 +125,6 @@ class SettingController extends Controller
             $form = $request->request->all();
             $msg['type'] = 'success';
 
-            if(empty($form['title'])) {
-                $msg = array(
-                    'type'   => 'error',
-                    'debug'  => '[Error field is missing] [edit|setting|title] See SettingController/editSettingAction',
-                    'msg'    => 'Le champs "titre" est obligatoire, veuillez le renseigner.'
-                );
-            }
             if(empty($form['value'])) {
                 $msg = array(
                     'type'   => 'error',
@@ -121,21 +132,15 @@ class SettingController extends Controller
                     'msg'    => 'Le champs "valeur" est obligatoire, veuillez le renseigner.'
                 );
             }
-            if(!empty($form['value']) && $form['is_int'] == 1) {
-                $form['value'] = intval($form['value']);
-            } else {
-                $form['value'] = strval($form['value']);
-            }
 
             if($msg['type'] == 'success') {
                 $em->persist($setting);
                 $em->flush();
                 $msg = array(
                     'type'       => 'success',
-                    'msg'        => 'Le réglage "'.$form['title'].'" a bien été édité.',
-                    'title'      => $form['title'],
+                    'msg'        => 'Le réglage "'.$setting->getTitle().'" a bien été édité.',
+                    'title'      => $setting->getTitle(),
                     'value'      => $form['value'],
-                    'is_int'     => $form['is_int'],
                     'id'         => $setting->getId(),
                 );
             }
