@@ -31,7 +31,14 @@ class Access
     private $title;
 
     /**
-     * @ManyToMany(targetEntity="User", mappedBy="accesss")
+     * @var string
+     *
+     * @ORM\Column(name="slug", type="string", length=255)
+     */
+    private $slug;
+
+    /**
+     * @ManyToMany(targetEntity="User", mappedBy="access")
      */
     private $user;
 
@@ -87,6 +94,22 @@ class Access
     public function setUser($user)
     {
         $this->user = $user;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+
+    /**
+     * @param mixed $slug
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
     }
 }
 

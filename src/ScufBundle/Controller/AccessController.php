@@ -16,6 +16,23 @@ class AccessController extends Controller
 {
 
     /**
+     * @Route("/list", name="listAccess")
+     */
+    public function listAccessAction()
+    {
+        $em = $this->getDoctrine()->getEntityManager();
+        $accessList = $em->getRepository('ScufBundle:Access')->findAll();
+        $response = array();
+        foreach ($accessList as $list) {
+            $response[] = array(
+                'title' => $list->getTitle(),
+                'id' => $list->getId(),
+            );
+        }
+        return new JsonResponse($response);
+    }
+
+    /**
      * @Route("/create", name="createAccess")
      */
     public function createAccessAction(Request $request)
@@ -23,37 +40,41 @@ class AccessController extends Controller
         $em = $this->getDoctrine()->getEntityManager();
 
         $access = new Access();
-        $createAccessForm = $this->createForm(AccessType::class, $access);
-        $createAccessForm->handleRequest($request);
+        $createAccessForm = $this->createForm(AccessType::class, $access, array(
+            'method' => 'post'
+        ));
 
-        if($request->isXmlHttpRequest()) {
-            $form = $request->request->all();
-            //$form = $request->get('title');
+        $msg = array();
 
-            if(empty($form['title'])) {
-                $msg = array(
-                    'type'   => 'error',
-                    'debug'  => '[Error field is missing] [create|access|title] See AccessController/createAccessAction',
-                    'msg'    => 'Le champs "titre" est obligatoire, veuillez le renseigner.'
-                );
+        if ($request->isMethod('POST')) {
+            $createAccessForm->submit($request->request->all());
+            if ($createAccessForm->isValid()) {
+                $form = $request->request->all();
+
+                if (empty($form['title'])) {
+                    $msg = array(
+                        'type' => 'error',
+                        'debug' => '[Error field is missing] [create|access|title] See AccessController/createAccessAction',
+                        'msg' => 'Le champs "titre" est obligatoire, veuillez le renseigner.'
+                    );
+                } else {
+                    $em->persist($access);
+                    $em->flush();
+                    $msg = array(
+                        'type' => 'success',
+                        'msg' => 'Le droit ' . $form['title'] . ' a bien été ajouté.',
+                        'title' => $form['title'],
+                        'id' => $access->getId(),
+                    );
+                }
             } else {
-                $em->persist($access);
-                $em->flush();
                 $msg = array(
-                    'type'       => 'success',
-                    'msg'        => 'Le droit '.$form['title'].' a bien été ajouté.',
-                    'title'      => $form['title'],
-                    'id'         => $access->getId(),
+                    'type' => 'error',
+                    'debug' => '[Error] [create|access] See AccessController/createAccessAction',
+                    'msg' => 'Erreur lors de la création du droit. Veuillez réssayer.'
                 );
             }
-            return new JsonResponse($msg);
         }
-
-        $msg = array(
-            'type' => 'error',
-            'debug'  => '[Error] [create|access] See AccessController/createAccessAction',
-            'msg'  => 'Erreur lors de la création du droit. Veuillez réssayer.'
-        );
         return new JsonResponse($msg);
     }
 
@@ -69,7 +90,8 @@ class AccessController extends Controller
 
         $msg = array(
             'type' => 'success',
-            'msg'  => 'Le droit a bien été supprimé.'
+            'msg'  => 'Le droit a bien été supprimé.',
+            'id' => $id,
         );
         return new JsonResponse($msg);
     }

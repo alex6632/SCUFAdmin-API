@@ -12,15 +12,16 @@ class AccessType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('title', TextType::class, array(
-            'label' => 'Nom'
-        ));
+        $builder
+            ->add('title', TextType::class, array('label' => 'Nom'))
+            ->add('slug', TextType::class, array('label' => 'Identifiant'));
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'ScufBundle\Entity\Access'
+            'data_class' => 'ScufBundle\Entity\Access',
+            'csrf_protection' => false,
         ));
     }
 
