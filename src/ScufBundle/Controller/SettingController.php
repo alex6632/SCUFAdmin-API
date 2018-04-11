@@ -115,43 +115,50 @@ class SettingController extends Controller
      */
     public function editSettingAction(Request $request, $id)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->getDoctrine()->getEntityManager();
         $setting = $em->getRepository('ScufBundle:Setting')->find($id);
 
-        $editSettingForm = $this->createForm(SettingType::class, $setting);
-        $editSettingForm->handleRequest($request);
+        $editSettingForm = $this->createForm(SettingType::class, $setting, array(
+            'method' => 'post'
+        ));
 
-        if($request->isXmlHttpRequest()) {
-            $form = $request->request->all();
-            $msg['type'] = 'success';
+        $msg = array();
 
-            if(empty($form['value'])) {
+        if ($request->isMethod('POST')) {
+            $editSettingForm->submit($request->request->all());
+            if ($editSettingForm->isValid()) {
+                $form = $request->request->all();
+
+                $msg['type'] = 'success';
+
+                if(empty($form['value'])) {
+                    $msg = array(
+                        'type'   => 'error',
+                        'debug'  => '[Error field is missing] [edit|setting|value] See SettingController/editSettingAction',
+                        'msg'    => 'Le champs "valeur" est obligatoire, veuillez le renseigner.'
+                    );
+                }
+
+                if($msg['type'] == 'success') {
+                    $em->persist($setting);
+                    $em->flush();
+                    $msg = array(
+                        'type'       => 'success',
+                        'msg'        => 'Le réglage "'.$setting->getTitle().'" a bien été édité.',
+                        'title'      => $setting->getTitle(),
+                        'value'      => $form['value'],
+                        'id'         => $setting->getId(),
+                    );
+                }
+
+            } else {
                 $msg = array(
-                    'type'   => 'error',
-                    'debug'  => '[Error field is missing] [edit|setting|value] See SettingController/editSettingAction',
-                    'msg'    => 'Le champs "valeur" est obligatoire, veuillez le renseigner.'
+                    'type' => 'error',
+                    'debug'  => '[Error] [edit|setting] See SettingController/editSettingAction',
+                    'msg'  => "Erreur lors de l'édition du réglage. Veuillez réssayer."
                 );
             }
-
-            if($msg['type'] == 'success') {
-                $em->persist($setting);
-                $em->flush();
-                $msg = array(
-                    'type'       => 'success',
-                    'msg'        => 'Le réglage "'.$setting->getTitle().'" a bien été édité.',
-                    'title'      => $setting->getTitle(),
-                    'value'      => $form['value'],
-                    'id'         => $setting->getId(),
-                );
-            }
-            return new JsonResponse($msg);
         }
-
-        $msg = array(
-            'type' => 'error',
-            'debug'  => '[Error] [edit|setting] See SettingController/editSettingAction',
-            'msg'  => "Erreur lors de l'édition du réglage. Veuillez réssayer."
-        );
         return new JsonResponse($msg);
     }
 }

@@ -23,7 +23,8 @@ class SettingType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'ScufBundle\Entity\Setting'
+            'data_class' => 'ScufBundle\Entity\Setting',
+            'csrf_protection' => false,
         ));
     }
 
