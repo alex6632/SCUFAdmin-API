@@ -22,12 +22,12 @@ class AccessController extends Controller
     {
         $em = $this->getDoctrine()->getEntityManager();
         $accessList = $em->getRepository('ScufBundle:Access')->findAll();
-        $response = array();
+        $response = [];
         foreach ($accessList as $list) {
-            $response[] = array(
-                'title' => $list->getTitle(),
+            $response[] = [
                 'id' => $list->getId(),
-            );
+                'title' => $list->getTitle(),
+            ];
         }
         return new JsonResponse($response);
     }

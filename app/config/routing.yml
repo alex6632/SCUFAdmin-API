@@ -1,8 +1,12 @@
+app:
+    resource: '@AppBundle/Controller/DefaultController.php'
+    type: annotation
+
 scuf:
     resource: "@ScufBundle/Controller/"
     type:     annotation
     prefix:   /
 
-app:
-    resource: '@AppBundle/Controller/'
-    type: annotation
+user:
+    type: rest
+    resource: ScufBundle\Controller\UserController

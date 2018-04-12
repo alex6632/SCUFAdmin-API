@@ -2,6 +2,7 @@
 
 namespace ScufBundle\Entity;
 
+use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinTable;
@@ -88,6 +89,13 @@ class User
      * @ORM\Column(name="overtime", type="integer", nullable=true)
      */
     private $overtime;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="role", type="integer")
+     */
+    private $role;
 
     /**
      * @ManyToMany(targetEntity="Access", inversedBy="users")
@@ -325,6 +333,22 @@ class User
     public function getOvertime()
     {
         return $this->overtime;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRole()
+    {
+        return $this->role;
+    }
+
+    /**
+     * @param int $role
+     */
+    public function setRole($role)
+    {
+        $this->role = $role;
     }
 
     /**
