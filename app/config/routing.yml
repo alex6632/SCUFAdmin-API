@@ -3,9 +3,16 @@ app:
     type: annotation
 
 scuf:
-    resource: "@ScufBundle/Controller/"
+    resource: '@ScufBundle/Controller/DefaultController.php'
     type:     annotation
-    prefix:   /
+
+access:
+    type: rest
+    resource: ScufBundle\Controller\AccessController
+
+setting:
+    type: rest
+    resource: ScufBundle\Controller\SettingController
 
 user:
     type: rest

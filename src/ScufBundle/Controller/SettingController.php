@@ -5,36 +5,27 @@ namespace ScufBundle\Controller;
 use ScufBundle\Entity\Setting;
 use ScufBundle\Form\SettingType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use FOS\RestBundle\Controller\Annotations as Rest;
 
-/**
- * @Route("/setting")
- */
 class SettingController extends Controller
 {
 
     /**
-     * @Route("/list", name="listSetting")
+     * @Rest\View()
+     * @Rest\Get("/settings")
      */
     public function listSettingAction()
     {
         $em = $this->getDoctrine()->getEntityManager();
         $settingList = $em->getRepository('ScufBundle:Setting')->findAll();
-        $response = array();
-        foreach ($settingList as $list) {
-            $response[] = array(
-                'title' => $list->getTitle(),
-                'value' => $list->getValue(),
-                'id' => $list->getId(),
-            );
-        }
-        return new JsonResponse($response);
+        return $settingList;
     }
 
     /**
-     * @Route("/create", name="createSetting")
+     * @Rest\View()
+     * @Rest\Post("/setting/create")
      */
     public function createSettingAction(Request $request)
     {
@@ -94,7 +85,8 @@ class SettingController extends Controller
     }
 
     /**
-     * @Route("/delete/{id}", name="deleteSetting")
+     * @Rest\View()
+     * @Rest\Get("/setting/delete/{id}")
      */
     public function deleteSettingAction(Request $request, $id)
     {
@@ -111,7 +103,8 @@ class SettingController extends Controller
     }
 
     /**
-     * @Route("/edit/{id}", name="editSetting")
+     * @Rest\View()
+     * @Rest\Post("/setting/update/{id}")
      */
     public function editSettingAction(Request $request, $id)
     {

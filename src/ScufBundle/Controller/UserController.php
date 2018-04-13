@@ -3,41 +3,31 @@
 namespace ScufBundle\Controller;
 
 use ScufBundle\Entity\User;
+use ScufBundle\Form\UserType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use FOS\RestBundle\Controller\Annotations\Get;
+use FOS\RestBundle\Controller\Annotations as Rest;
 
 class UserController extends Controller
 {
 
     /**
-     * @Get("/user")
+     * @Rest\View()
+     * @Rest\Get("/users")
      */
-    public function listUserAction()
+    public function listUsersAction()
     {
         $em = $this->getDoctrine()->getEntityManager();
         $userList = $em->getRepository('ScufBundle:User')->findAll();
-        $response = [];
-        foreach ($userList as $list) {
-            $response[] = [
-                'id' => $list->getId(),
-                'username' => $list->getUsername(),
-                'firstname' => $list->getFirstname(),
-                'lastname' => $list->getLastname(),
-                'role' => $list->getRole(),
-                'superior' => $list->getSuperior(),
-            ];
-        }
-        return new JsonResponse($response);
+        return $userList;
     }
 
     /**
-     * @Get("/user/{id}")
+     * @Rest\View()
+     * @Rest\Get("/user/{id}")
      */
     public function oneUserAction($id)
     {
@@ -47,27 +37,31 @@ class UserController extends Controller
         if (empty($user)) {
             return new JsonResponse(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
-
-        $response = [
-            'id' => $user->getId(),
-            'username' => $user->getUsername(),
-            'firstname' => $user->getFirstname(),
-            'lastname' => $user->getLastname(),
-            'role' => $user->getRole(),
-            'superior' => $user->getSuperior(),
-            'access' => $user->getAccess(),
-            'hoursTodo' => $user->getHoursTodo(),
-            'hoursDone' => $user->getHoursDone(),
-            'hoursPlanified' => $user->getHoursPlanified(),
-            'hoursPlanifiedByMe' => $user->getHoursPlanifiedByMe(),
-            'overtime' => $user->getOvertime(),
-            'action' => $user->getAction(),
-        ];
-        return new JsonResponse($response);
+        return $user;
     }
 
     /**
-     * @Route("/login", name="login")
+     * @Rest\View(statusCode=Response::HTTP_CREATED)
+     * @Rest\Post("/user/create")
+     */
+    public function createUserAction(Request $request)
+    {
+        $user = new User();
+        $form = $this->createForm(UserType::class, $user);
+        $form->submit($request->request->all());
+
+        if ($form->isValid()) {
+            $em = $this->get('doctrine.orm.entity_manager');
+            $em->persist($user);
+            $em->flush();
+            return $user;
+        } else {
+            return $form;
+    }
+
+    /**
+     * @Rest\View()
+     * @Rest\Get("/user/login")
      */
     public function loginAction()
     {
@@ -75,7 +69,8 @@ class UserController extends Controller
     }
 
     /**
-     * @Route("/logout", name="logout")
+     * @Rest\View()
+     * @Rest\Get("/user/logout")
      */
     public function logoutAction()
     {

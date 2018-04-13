@@ -5,35 +5,27 @@ namespace ScufBundle\Controller;
 use ScufBundle\Entity\Access;
 use ScufBundle\Form\AccessType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use FOS\RestBundle\Controller\Annotations as Rest;
 
-/**
- * @Route("/access")
- */
 class AccessController extends Controller
 {
 
     /**
-     * @Route("/list", name="listAccess")
+     * @Rest\View()
+     * @Rest\Get("/access")
      */
     public function listAccessAction()
     {
         $em = $this->getDoctrine()->getEntityManager();
         $accessList = $em->getRepository('ScufBundle:Access')->findAll();
-        $response = [];
-        foreach ($accessList as $list) {
-            $response[] = [
-                'id' => $list->getId(),
-                'title' => $list->getTitle(),
-            ];
-        }
-        return new JsonResponse($response);
+        return $accessList;
     }
 
     /**
-     * @Route("/create", name="createAccess")
+     * @Rest\View()
+     * @Rest\Post("/access/create")
      */
     public function createAccessAction(Request $request)
     {
@@ -79,7 +71,8 @@ class AccessController extends Controller
     }
 
     /**
-     * @Route("/delete/{id}", name="deleteAccess")
+     * @Rest\View()
+     * @Rest\Get("/access/delete/{id}")
      */
     public function deleteAccessAction(Request $request, $id)
     {
@@ -97,7 +90,8 @@ class AccessController extends Controller
     }
 
     /**
-     * @Route("/edit/{id}", name="editAccess")
+     * @Rest\View()
+     * @Rest\Post("/access/update/{id}")
      */
     public function editAccessAction(Request $request, $id)
     {

@@ -104,8 +104,8 @@ class User
     private $access;
 
     /**
-     *
      * @ManyToOne(targetEntity="User", inversedBy="superior")
+     * @ORM\JoinColumn(nullable=true)
      */
     private $superior;
 
