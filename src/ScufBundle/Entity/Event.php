@@ -27,28 +27,28 @@ class Event
     /**
      * @var string
      *
-     * @ORM\Column(name="title", type="string", length=255)
+     * @ORM\Column(name="title", type="string", length=255, nullable=true)
      */
     private $title;
 
     /**
      * @var bool
      *
-     * @ORM\Column(name="all_day", type="boolean")
+     * @ORM\Column(name="all_day", type="boolean", nullable=true)
      */
     private $allDay;
 
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="start", type="datetime")
+     * @ORM\Column(name="start", type="datetime", nullable=true)
      */
     private $start;
 
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="end", type="datetime")
+     * @ORM\Column(name="end", type="datetime", nullable=true)
      */
     private $end;
 
@@ -61,11 +61,12 @@ class Event
 
     /**
      * @ManyToMany(targetEntity="User", mappedBy="events")
+     * @ORM\JoinColumn(nullable=true)
      */
-    private $user;
+    private $users;
 
     public function __construct() {
-        $this->user = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     /**
@@ -201,17 +202,25 @@ class Event
     /**
      * @return mixed
      */
-    public function getUser()
+    public function getUsers()
     {
-        return $this->user;
+        return $this->users;
     }
 
     /**
      * @param mixed $user
      */
-    public function setUser($user)
+    public function addUser($user)
     {
-        $this->user = $user;
+        if(!$this->users->contains($user)) {
+            $this->users->add($user);
+        }
+    }
+
+    public function removeUser($user)
+    {
+        // Remove ou removeElement
+        $this->users->remove($user);
     }
 }
 

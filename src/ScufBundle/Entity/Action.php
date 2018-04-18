@@ -73,11 +73,14 @@ class Action
 
     /**
      * @ManyToOne(targetEntity="User", inversedBy="actions")
+     * @ORM\JoinColumn(nullable=true)
      */
-    private $sender;
+    private $user;
 
     /**
-     * @ManyToOne(targetEntity="User", inversedBy="actions")
+     * @var int
+     *
+     * @ORM\Column(name="recipient", type="integer")
      */
     private $recipient;
 
@@ -262,17 +265,17 @@ class Action
     /**
      * @return mixed
      */
-    public function getSender()
+    public function getUser()
     {
-        return $this->sender;
+        return $this->user;
     }
 
     /**
-     * @param mixed $sender
+     * @param mixed $user
      */
-    public function setSender($sender)
+    public function setUser($user)
     {
-        $this->sender = $sender;
+        $this->user = $user;
     }
 
     /**

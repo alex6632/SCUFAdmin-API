@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Symfony\Component\HttpFoundation\Response;
 
 class AccessController extends Controller
 {
@@ -78,9 +79,11 @@ class AccessController extends Controller
     {
         $em = $this->getDoctrine()->getEntityManager();
         $access = $em->getRepository('ScufBundle:Access')->find($id);
-        $em->remove($access);
-        $em->flush();
 
+        if($access) {
+            $em->remove($access);
+            $em->flush();
+        }
         $msg = array(
             'type' => 'success',
             'msg'  => 'Le droit a bien été supprimé.',
@@ -91,43 +94,40 @@ class AccessController extends Controller
 
     /**
      * @Rest\View()
-     * @Rest\Post("/access/update/{id}")
+     * @Rest\Put("/access/update/{id}")
      */
     public function editAccessAction(Request $request, $id)
     {
         $em = $this->getDoctrine()->getManager();
         $access = $em->getRepository('ScufBundle:Access')->find($id);
 
-        $editAccessForm = $this->createForm(AccessType::class, $access);
-        $editAccessForm->handleRequest($request);
-
-        if($request->isXmlHttpRequest()) {
-            $form = $request->request->all();
-
-            if(empty($form['title'])) {
-                $msg = array(
-                    'type'   => 'error',
-                    'debug'  => '[Error field is missing] [edit|access|title] See AccessController/editAccessAction',
-                    'msg'    => 'Le champs "titre" est obligatoire, veuillez le renseigner.'
-                );
-            } else {
-                $em->persist($access);
-                $em->flush();
-                $msg = array(
-                    'type'       => 'success',
-                    'msg'        => 'Le droit '.$form['title'].' a bien été édité.',
-                    'title'      => $form['title'],
-                    'id'         => $access->getId(),
-                );
-            }
-            return new JsonResponse($msg);
+        if (empty($access)) {
+            return new JsonResponse(['msg' => 'Le droit n\'est pas trouvé'], Response::HTTP_NOT_FOUND);
         }
 
-        $msg = array(
-            'type' => 'error',
-            'debug'  => '[Error] [edit|access] See AccessController/editAccessAction',
-            'msg'  => "Erreur lors de l'édition du droit. Veuillez réssayer."
-        );
-        return new JsonResponse($msg);
+        $editAccessForm = $this->createForm(AccessType::class, $access);
+        //$editAccessForm->handleRequest($request);
+        $editAccessForm->submit($request->request->all());
+
+        if ($editAccessForm->isValid()) {
+            $em->persist($access);
+            $em->flush();
+            // return $access;
+            $msg = array(
+                'type'       => 'success',
+                'msg'        => 'Le droit '.$access->getTitle().' a bien été édité.',
+                'title'      => $access->getTitle(),
+                'id'         => $access->getId(),
+            );
+            return new JsonResponse($msg);
+        } else {
+            return $editAccessForm;
+        }
+//        $msg = array(
+//            'type' => 'error',
+//            'debug'  => '[Error] [edit|access] See AccessController/editAccessAction',
+//            'msg'  => "Erreur lors de l'édition du droit. Veuillez réssayer."
+//        );
+//        return new JsonResponse($msg);
     }
 }

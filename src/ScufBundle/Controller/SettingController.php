@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Symfony\Component\HttpFoundation\Response;
 
 class SettingController extends Controller
 {
@@ -104,54 +105,40 @@ class SettingController extends Controller
 
     /**
      * @Rest\View()
-     * @Rest\Post("/setting/update/{id}")
+     * @Rest\Put("/setting/update/{id}")
      */
-    public function editSettingAction(Request $request, $id)
+    public function editSettingAction(Request $request, $id, $clearMissing)
     {
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $setting = $em->getRepository('ScufBundle:Setting')->find($id);
 
-        $editSettingForm = $this->createForm(SettingType::class, $setting, array(
-            'method' => 'post'
-        ));
-
-        $msg = array();
-
-        if ($request->isMethod('POST')) {
-            $editSettingForm->submit($request->request->all());
-            if ($editSettingForm->isValid()) {
-                $form = $request->request->all();
-
-                $msg['type'] = 'success';
-
-                if(empty($form['value'])) {
-                    $msg = array(
-                        'type'   => 'error',
-                        'debug'  => '[Error field is missing] [edit|setting|value] See SettingController/editSettingAction',
-                        'msg'    => 'Le champs "valeur" est obligatoire, veuillez le renseigner.'
-                    );
-                }
-
-                if($msg['type'] == 'success') {
-                    $em->persist($setting);
-                    $em->flush();
-                    $msg = array(
-                        'type'       => 'success',
-                        'msg'        => 'Le réglage "'.$setting->getTitle().'" a bien été édité.',
-                        'title'      => $setting->getTitle(),
-                        'value'      => $form['value'],
-                        'id'         => $setting->getId(),
-                    );
-                }
-
-            } else {
-                $msg = array(
-                    'type' => 'error',
-                    'debug'  => '[Error] [edit|setting] See SettingController/editSettingAction',
-                    'msg'  => "Erreur lors de l'édition du réglage. Veuillez réssayer."
-                );
-            }
+        if (empty($setting)) {
+            return \FOS\RestBundle\View\View::create(['msg' => 'Le réglage n\'est pas trouvé'], Response::HTTP_NOT_FOUND);
         }
-        return new JsonResponse($msg);
+
+        $editSettingForm = $this->createForm(SettingType::class, $setting);
+        $editSettingForm->submit($request->request->all(), $clearMissing);
+
+        if ($editSettingForm->isValid()) {
+
+            $em->persist($setting);
+            $em->flush();
+            $msg = array(
+                'type'       => 'success',
+                'msg'        => 'Le réglage "'.$setting->getTitle().'" a bien été édité.',
+                'title'      => $setting->getTitle(),
+                'value'      => $setting->getValue(),
+                'id'         => $setting->getId(),
+            );
+            return new JsonResponse($msg);
+
+        } else {
+            return $editSettingForm;
+//                $msg = array(
+//                    'type' => 'error',
+//                    'debug'  => '[Error] [edit|setting] See SettingController/editSettingAction',
+//                    'msg'  => "Erreur lors de l'édition du réglage. Veuillez réssayer."
+//                );
+        }
     }
 }

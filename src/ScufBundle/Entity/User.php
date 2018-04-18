@@ -100,11 +100,12 @@ class User
     /**
      * @ManyToMany(targetEntity="Access", inversedBy="users")
      * @JoinTable(name="users_access")
+     * @ORM\JoinColumn(nullable=true)
      */
     private $access;
 
     /**
-     * @ManyToOne(targetEntity="User", inversedBy="superior")
+     * @ManyToOne(targetEntity="User", inversedBy="users")
      * @ORM\JoinColumn(nullable=true)
      */
     private $superior;
@@ -112,11 +113,13 @@ class User
     /**
      * @ManyToMany(targetEntity="Event", inversedBy="users")
      * @JoinTable(name="users_events")
+     * @ORM\JoinColumn(nullable=true)
      */
     private $event;
 
     /**
      * @OneToMany(targetEntity="Action", mappedBy="user")
+     * @ORM\JoinColumn(nullable=true)
      */
     private $action;
 

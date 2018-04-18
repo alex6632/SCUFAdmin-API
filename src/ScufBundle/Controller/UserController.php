@@ -20,7 +20,8 @@ class UserController extends Controller
      */
     public function listUsersAction()
     {
-        $em = $this->getDoctrine()->getEntityManager();
+        //$em = $this->getDoctrine()->getEntityManager();
+        $em = $this->get('doctrine.orm.entity_manager');
         $userList = $em->getRepository('ScufBundle:User')->findAll();
         return $userList;
     }
@@ -31,7 +32,8 @@ class UserController extends Controller
      */
     public function oneUserAction($id)
     {
-        $em = $this->getDoctrine()->getEntityManager();
+        //$em = $this->getDoctrine()->getEntityManager();
+        $em = $this->get('doctrine.orm.entity_manager');
         $user = $em->getRepository('ScufBundle:User')->find($id);
 
         if (empty($user)) {
@@ -57,6 +59,7 @@ class UserController extends Controller
             return $user;
         } else {
             return $form;
+        }
     }
 
     /**

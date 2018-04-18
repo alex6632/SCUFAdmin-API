@@ -2,7 +2,12 @@
 
 namespace ScufBundle\Form;
 
+use ScufBundle\Entity\Access;
+use ScufBundle\Entity\Action;
+use ScufBundle\Entity\Event;
+use ScufBundle\Entity\User;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -15,17 +20,36 @@ class UserType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
+            ->add('username', TextType::class)
+            ->add('password', PasswordType::class)
             ->add('firstname', TextType::class)
             ->add('lastname', TextType::class)
-            ->add('superior', IntegerType::class)
             ->add('hours_todo', IntegerType::class)
             ->add('hours_done', IntegerType::class)
             ->add('hours_planified', IntegerType::class)
             ->add('hours_planified_by_me', IntegerType::class)
             ->add('overtime', IntegerType::class)
-            ->add('username', TextType::class)
-            ->add('password', PasswordType::class)
-            ->add('role', IntegerType::class);
+            ->add('role', IntegerType::class)
+            ->add('access', EntityType::class, array(
+                'class' => Access::class,
+                'choice_label' => function ($access) {
+                    return $access->getTitle();
+                },
+                'multiple' => true
+            ))
+            ->add('superior', EntityType::class, array(
+                'class' => User::class,
+                'choice_label' => function ($user) {
+                    return $user->getFirstname().' '.$user->getLastname();
+                }
+            ))
+            ->add('event', EntityType::class, array(
+                'class' => Event::class,
+                'choice_label' => function ($event) {
+                    return $event->getTitle();
+                },
+                'multiple' => true
+            ));
     }
 
     public function configureOptions(OptionsResolver $resolver)

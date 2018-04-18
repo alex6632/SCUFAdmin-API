@@ -39,11 +39,12 @@ class Access
 
     /**
      * @ManyToMany(targetEntity="User", mappedBy="access")
+     * @ORM\JoinColumn(nullable=true)
      */
-    private $user;
+    private $users;
 
     public function __construct() {
-        $this->user = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     /**
@@ -83,17 +84,25 @@ class Access
     /**
      * @return mixed
      */
-    public function getUser()
+    public function getUsers()
     {
-        return $this->user;
+        return $this->users;
     }
 
     /**
      * @param mixed $user
      */
-    public function setUser($user)
+    public function addUser($user)
     {
-        $this->user = $user;
+        if(!$this->users->contains($user)) {
+            $this->users->add($user);
+        }
+    }
+
+    public function removeUser($user)
+    {
+        // Remove ou removeElement
+        $this->users->remove($user);
     }
 
     /**
