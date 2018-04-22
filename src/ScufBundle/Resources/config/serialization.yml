@@ -1,0 +1,60 @@
+ScufBundle\Entity\Access:
+    attributes:
+        id:
+            groups: ['user', 'access']
+        title:
+            groups: ['user', 'access']
+        slug:
+            groups: ['user', 'access']
+        users:
+            groups: ['access']
+
+ScufBundle\Entity\Event:
+    attributes:
+        id:
+            groups: ['user', 'event']
+        title:
+            groups: ['user', 'event']
+        allDay:
+            groups: ['user', 'event']
+        start:
+            groups: ['user', 'event']
+        end:
+            groups: ['user', 'event']
+        location:
+            groups: ['user', 'event']
+        users:
+            groups: ['event']
+
+ScufBundle\Entity\User:
+    attributes:
+        id:
+            groups: ['user', 'access', 'event']
+        username:
+            groups: ['user', 'access', 'event']
+        password:
+            groups: ['user', 'access', 'event']
+        firstname:
+            groups: ['user', 'access', 'event']
+        lastname:
+            groups: ['user', 'access', 'event']
+        hoursTodo:
+            groups: ['user', 'access', 'event']
+        hoursDone:
+            groups: ['user', 'access', 'event']
+        hoursPlanified:
+            groups: ['user', 'access', 'event']
+        hoursPlanifiedByMe:
+            groups: ['user', 'access', 'event']
+        overtime:
+            groups: ['user', 'access', 'event']
+        role:
+            groups: ['user', 'access', 'event']
+        superior:
+            groups: ['user', 'access', 'event']
+        action:
+            groups: ['user', 'access', 'event']
+        event:
+            groups: ['user']
+        access:
+            groups: ['user']

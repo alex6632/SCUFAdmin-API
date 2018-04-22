@@ -15,7 +15,7 @@ class UserController extends Controller
 {
 
     /**
-     * @Rest\View()
+     * @Rest\View(serializerGroups={"user"})
      * @Rest\Get("/users")
      */
     public function listUsersAction()
@@ -27,7 +27,7 @@ class UserController extends Controller
     }
 
     /**
-     * @Rest\View()
+     * @Rest\View(serializerGroups={"user"})
      * @Rest\Get("/user/{id}")
      */
     public function oneUserAction($id)
@@ -43,7 +43,7 @@ class UserController extends Controller
     }
 
     /**
-     * @Rest\View(statusCode=Response::HTTP_CREATED)
+     * @Rest\View(statusCode=Response::HTTP_CREATED, serializerGroups={"user"})
      * @Rest\Post("/user/create")
      */
     public function createUserAction(Request $request)
@@ -54,11 +54,28 @@ class UserController extends Controller
 
         if ($form->isValid()) {
             $em = $this->get('doctrine.orm.entity_manager');
+            $user->setHoursTodo(0);
+            $user->setHoursDone(0);
+            $user->setHoursPlanifiedByMe(0);
+            $user->setOvertime(0);
             $em->persist($user);
             $em->flush();
-            return $user;
+            $msg = array(
+                'type' => 'success',
+                'msg' => 'Le user a bien été ajouté.',
+                'user' => $user,
+            );
+            return new JsonResponse($msg);
         } else {
-            return $form;
+            //return $form;
+            $msg = array(
+                'type' => 'error',
+                'debug' => '[Error] [create|user] See UserController/createUserAction',
+                'msg' => 'Erreur lors de la création de l\'utilisateur. Veuillez réssayer.',
+                'user' => $user,
+                'form' => $form
+            );
+            return new JsonResponse($msg);
         }
     }
 
