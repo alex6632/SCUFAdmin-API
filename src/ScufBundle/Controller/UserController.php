@@ -4,7 +4,6 @@ namespace ScufBundle\Controller;
 
 use ScufBundle\Entity\User;
 use ScufBundle\Form\UserType;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -77,6 +76,25 @@ class UserController extends Controller
             );
             return new JsonResponse($msg);
         }
+    }
+
+    /**
+     * @Rest\View()
+     * @Rest\DELETE("/user/delete/{id}")
+     */
+    public function deleteUserAction(Request $request, $id)
+    {
+        $em = $this->getDoctrine()->getEntityManager();
+        $setting = $em->getRepository('ScufBundle:User')->find($id);
+        $em->remove($setting);
+        $em->flush();
+
+        $msg = array(
+            'type' => 'success',
+            'msg'  => 'L\'utilisateur a bien été supprimé.',
+            'id' => $id
+        );
+        return new JsonResponse($msg);
     }
 
     /**

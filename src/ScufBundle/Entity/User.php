@@ -100,25 +100,25 @@ class User
     /**
      * @ManyToMany(targetEntity="Access", inversedBy="users")
      * @JoinTable(name="users_access")
-     * @ORM\JoinColumn(nullable=true)
+     * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
      */
     private $access;
 
     /**
      * @ManyToOne(targetEntity="User", inversedBy="users")
-     * @ORM\JoinColumn(nullable=true)
+     * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
      */
     private $superior;
 
     /**
-     * @ManyToMany(targetEntity="Event", inversedBy="users")
+     * @ManyToMany(targetEntity="Event", inversedBy="users", cascade={"remove"})
      * @JoinTable(name="users_events")
      * @ORM\JoinColumn(nullable=true)
      */
     private $event;
 
     /**
-     * @OneToMany(targetEntity="Action", mappedBy="user")
+     * @OneToMany(targetEntity="Action", mappedBy="user", cascade={"remove"})
      * @ORM\JoinColumn(nullable=true)
      */
     private $action;

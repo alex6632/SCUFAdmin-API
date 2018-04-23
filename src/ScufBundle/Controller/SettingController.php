@@ -87,7 +87,7 @@ class SettingController extends Controller
 
     /**
      * @Rest\View()
-     * @Rest\Get("/setting/delete/{id}")
+     * @Rest\DELETE("/setting/delete/{id}")
      */
     public function deleteSettingAction(Request $request, $id)
     {
@@ -98,7 +98,8 @@ class SettingController extends Controller
 
         $msg = array(
             'type' => 'success',
-            'msg'  => 'Le réglage a bien été supprimé.'
+            'msg'  => 'Le réglage a bien été supprimé.',
+            'id' => $id
         );
         return new JsonResponse($msg);
     }
@@ -107,38 +108,46 @@ class SettingController extends Controller
      * @Rest\View()
      * @Rest\Put("/setting/update/{id}")
      */
-    public function editSettingAction(Request $request, $id, $clearMissing)
+    public function editSettingAction(Request $request)
+    {
+        return $this->editSetting($request, true);
+    }
+
+    /**
+     * @Rest\View()
+     * @Rest\Patch("/setting/update/{id}")
+     */
+    public function patchSettingAction(Request $request)
+    {
+        return $this->editSetting($request, false);
+    }
+
+
+    private function editSetting(Request $request,  $clearMissing)
     {
         $em = $this->getDoctrine()->getManager();
-        $setting = $em->getRepository('ScufBundle:Setting')->find($id);
+        $setting = $em->getRepository('ScufBundle:Setting')->find($request->get('id'));
 
         if (empty($setting)) {
-            return \FOS\RestBundle\View\View::create(['msg' => 'Le réglage n\'est pas trouvé'], Response::HTTP_NOT_FOUND);
+            return \FOS\RestBundle\View\View::create(['msg' => 'Le réglage n\'a pas pu être trouvé'], Response::HTTP_NOT_FOUND);
         }
 
         $editSettingForm = $this->createForm(SettingType::class, $setting);
         $editSettingForm->submit($request->request->all(), $clearMissing);
 
         if ($editSettingForm->isValid()) {
-
             $em->persist($setting);
             $em->flush();
             $msg = array(
                 'type'       => 'success',
-                'msg'        => 'Le réglage "'.$setting->getTitle().'" a bien été édité.',
+                'msg'        => 'Le réglage '.$setting->getTitle().' a bien été édité.',
                 'title'      => $setting->getTitle(),
                 'value'      => $setting->getValue(),
-                'id'         => $setting->getId(),
+                'id'         => $setting->getId()
             );
             return new JsonResponse($msg);
-
         } else {
             return $editSettingForm;
-//                $msg = array(
-//                    'type' => 'error',
-//                    'debug'  => '[Error] [edit|setting] See SettingController/editSettingAction',
-//                    'msg'  => "Erreur lors de l'édition du réglage. Veuillez réssayer."
-//                );
         }
     }
 }

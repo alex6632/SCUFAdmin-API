@@ -40,9 +40,8 @@ class AccessController extends Controller
             $em->flush();
             $msg = array(
                 'type' => 'success',
-                'msg' => 'Le droit ' . $createAccessForm['title'] . ' a bien été ajouté.',
-                'title' => $createAccessForm['title'],
-                'id' => $access->getId(),
+                'msg' => 'Le droit a bien été ajouté.',
+                'access' => $access,
             );
         } else {
             $msg = array(
@@ -55,8 +54,8 @@ class AccessController extends Controller
     }
 
     /**
-     * @Rest\View()
-     * @Rest\Get("/access/delete/{id}")
+     * @Rest\View(statusCode=Response::HTTP_NO_CONTENT)
+     * @Rest\Delete("/access/delete/{id}")
      */
     public function deleteAccessAction(Request $request, $id)
     {
@@ -79,23 +78,36 @@ class AccessController extends Controller
      * @Rest\View()
      * @Rest\Put("/access/update/{id}")
      */
-    public function editAccessAction(Request $request, $id)
+    public function editAccessAction(Request $request)
+    {
+        return $this->editAccess($request, true);
+    }
+
+    /**
+     * @Rest\View()
+     * @Rest\Patch("/access/update/{id}")
+     */
+    public function patchAccessAction(Request $request)
+    {
+        return $this->editAccess($request, false);
+    }
+
+
+    public function editAccess(Request $request, $clearMissing)
     {
         $em = $this->getDoctrine()->getManager();
-        $access = $em->getRepository('ScufBundle:Access')->find($id);
+        $access = $em->getRepository('ScufBundle:Access')->find($request->get('id'));
 
         if (empty($access)) {
-            return new JsonResponse(['msg' => 'Le droit n\'est pas trouvé'], Response::HTTP_NOT_FOUND);
+            return \FOS\RestBundle\View\View::create(['msg' => 'L\'accès n\'a pas pu être trouvé'], Response::HTTP_NOT_FOUND);
         }
 
         $editAccessForm = $this->createForm(AccessType::class, $access);
-        //$editAccessForm->handleRequest($request);
-        $editAccessForm->submit($request->request->all());
+        $editAccessForm->submit($request->request->all(), $clearMissing);
 
         if ($editAccessForm->isValid()) {
             $em->persist($access);
             $em->flush();
-            // return $access;
             $msg = array(
                 'type'       => 'success',
                 'msg'        => 'Le droit '.$access->getTitle().' a bien été édité.',
@@ -105,12 +117,12 @@ class AccessController extends Controller
             return new JsonResponse($msg);
         } else {
             return $editAccessForm;
+//            $msg = array(
+//                'type' => 'error',
+//                'debug'  => '[Error] [edit|access] See AccessController/editAccessAction',
+//                'msg'  => "Erreur lors de l'édition du droit. Veuillez réssayer."
+//            );
+//            return new JsonResponse($msg);
         }
-//        $msg = array(
-//            'type' => 'error',
-//            'debug'  => '[Error] [edit|access] See AccessController/editAccessAction',
-//            'msg'  => "Erreur lors de l'édition du droit. Veuillez réssayer."
-//        );
-//        return new JsonResponse($msg);
     }
 }
