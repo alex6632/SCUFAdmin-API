@@ -1,38 +1,31 @@
 <?php
 
-namespace AppBundle\Service;
+namespace ScufBundle\Service;
 
 use Elastica\Query\Match;
 use FOS\ElasticaBundle\Finder\FinderInterface;
 
-/**
- * Service pour exécuter des requêtes sur Elastic Search.
- */
-class MoteurRecherche
+class ElasticSearchMotor
 {
-    const MIN_CHAR_MDR_CATEGORIE = 3;
-    const LIMIT_MDR_CATEGORIE = 10;
+    const MIN_CHAR_USER = 3;
+    const LIMIT_USER = 10;
 
-    private $finderCategorie;
+    private $finderUser;
 
-    public function __construct(FinderInterface $finderCategorie)
+    public function __construct(FinderInterface $finderUser)
     {
-        $this->finderCategorie = $finderCategorie;
+        $this->finderUser = $finderUser;
     }
 
     /**
-     * Exécute la recherche sur Elasticsearch pour le moteur de recherche des catégories.
-     *
-     * @param string $recherche Valeur recherchée
-     *
-     * @return Categorie[]
+     * Exécute la recherche sur Elasticsearch pour le moteur de recherche des utilisateurs.
      */
-    public function rechercheCategories($recherche)
+    public function searchUsers($search)
     {
         $query = new Match();
-        $query->setFieldQuery('libelle', $recherche);
-        $query->setFieldOperator('libelle', 'AND');
+        $query->setFieldQuery('firstname', $search);
+        $query->setFieldOperator('firstname', 'AND');
 
-        return $this->finderCategorie->find($query, self::LIMIT_MDR_CATEGORIE);
+        return $this->finderUser->find($query, self::LIMIT_USER);
     }
 }

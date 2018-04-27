@@ -4,6 +4,7 @@ namespace ScufBundle\Controller;
 
 use ScufBundle\Entity\User;
 use ScufBundle\Form\UserType;
+use ScufBundle\Service\ElasticSearchMotor;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -99,11 +100,85 @@ class UserController extends Controller
 
     /**
      * @Rest\View()
-     * @Rest\Get("/user/login")
+     * @Rest\Put("/user/update/{id}")
      */
-    public function loginAction()
+    public function editUserAction(Request $request)
     {
-        return new JsonResponse('login');
+        return $this->editUser($request, true);
+    }
+
+    /**
+     * @Rest\View()
+     * @Rest\Patch("/user/update/{id}")
+     */
+    public function patchUserAction(Request $request)
+    {
+        return $this->editUser($request, false);
+    }
+
+
+    private function editUser(Request $request,  $clearMissing)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $user = $em->getRepository('ScufBundle:User')->find($request->get('id'));
+
+        if (empty($user)) {
+            return \FOS\RestBundle\View\View::create(['msg' => 'L\'utilisateur n\'a pas pu être trouvé'], Response::HTTP_NOT_FOUND);
+        }
+
+        $form = $this->createForm(UserType::class, $user);
+        $form->submit($request->request->all(), $clearMissing);
+
+        if ($form->isValid()) {
+            $em->persist($user);
+            $em->flush();
+            $msg = array(
+                'type'           => 'success',
+                'msg'            => 'L\'utilisateur "'.$user->getFirstname().' ' .$user->getLastname() .'" a bien été édité.',
+                'firstname'      => $user->getFirstname(),
+                'lastname'       => $user->getLastname(),
+                'username'       => $user->getUsername(),
+                'role'           => $user->getRole(),
+                'superior'       => $user->getSuperior(),
+                'access'         => $user->getAccess(),
+                'hoursPlanified' => $user->getHoursPlanified(),
+                'id'             => $user->getId()
+            );
+            return new JsonResponse($msg);
+        } else {
+            return $form;
+        }
+    }
+
+    /**
+     * @Rest\View()
+     * @Rest\Get("/user/search")
+     */
+    public function searchAction(Request $request)
+    {
+        $searchMotor = $this->get('service.elasticsearch');
+        $search = $request->query->get('search', '');
+
+        if ($request->isXmlHttpRequest()) {
+            if (strlen($search) >= ElasticSearchMotor::MIN_CHAR_USER) {
+                $searchResults = $searchMotor->searchUsers($search);
+                $users[] = [
+                    'result' => 'User',
+                    'url' => null
+                ];
+                foreach ($searchResults as $user) {
+                    $users[] = [
+                        'result' => $user->getFirstname().' '.$user->getLastname(),
+                        'url' => $this->router->generate()
+                    ];
+                }
+            } else {
+                $users = [];
+            }
+        } else {
+            $users = [];
+        }
+        return new JsonResponse($users);
     }
 
     /**
