@@ -69,6 +69,7 @@ swiftmailer:
     password: '%mailer_password%'
     spool: { type: memory }
 
+# Nelmio configuration
 nelmio_cors:
     defaults:
         allow_credentials: false
@@ -95,3 +96,36 @@ fos_rest:
     format_listener:
         rules:
             - { path: '^/', priorities: ['json'], fallback_format: 'json' }
+
+# Fos Elastica configuration
+fos_elastica:
+    clients:
+        default: { host: localhost, port: 9200 }
+    indexes:
+        app:
+            settings:
+                index:
+                    analysis:
+                        analyser:
+                            autocomplete_analyzer:
+                                type: custom
+                                tokenizer: autocomplete_tokenizer
+                                filter: [lowercase, asciifolding]
+                            tokenizer:
+                                autocomplete_tokenizer:
+                                    type: nGram
+                                    min_gram: 3
+                                    max_gram: 20
+            types:
+                user:
+                    properties:
+                        firstname: { type: string, analyzer: autocomplete_analyzer }
+                        lastname: { type: string, analyzer: autocomplete_analyzer }
+                        username: { type: string, analyzer: autocomplete_analyzer }
+                        role: { type: integer }
+                    persistence:
+                        driver: orm
+                        model: ScufBundle\Entity\User
+                        provider: ~
+                        listener: ~
+                        finder: ~
