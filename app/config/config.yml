@@ -106,22 +106,22 @@ fos_elastica:
             settings:
                 index:
                     analysis:
-                        analyser:
+                        analyzer:
                             autocomplete_analyzer:
                                 type: custom
-                                tokenizer: autocomplete_tokenizer
-                                filter: [lowercase, asciifolding]
-                            tokenizer:
-                                autocomplete_tokenizer:
-                                    type: nGram
-                                    min_gram: 3
-                                    max_gram: 20
+                                tokenizer: lowercase
+                                filter: [autocomplete_tokenizer]
+                        filter:
+                            autocomplete_tokenizer:
+                                type: "nGram"
+                                min_gram: 3
+                                max_gram: 20
             types:
                 user:
                     properties:
-                        firstname: { type: string, analyzer: autocomplete_analyzer }
-                        lastname: { type: string, analyzer: autocomplete_analyzer }
-                        username: { type: string, analyzer: autocomplete_analyzer }
+                        firstname: { type: text, analyzer: autocomplete_analyzer }
+                        lastname: { type: text, analyzer: autocomplete_analyzer }
+                        username: { type: text, analyzer: autocomplete_analyzer }
                         role: { type: integer }
                     persistence:
                         driver: orm

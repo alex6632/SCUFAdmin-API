@@ -10,4 +10,14 @@ namespace ScufBundle\Repository;
  */
 class UserRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function searchUser($term)
+    {
+        $queryBuilder = $this->_em->createQueryBuilder('u')
+            ->where('CONCAT(u.firstname, \' \', u.lastname) LIKE :firstname :lastname')
+            ->setParameter('firstname', '%'.$term.'%')
+            ->setParameter('lastname', '%'.$term.'%');
+        $query = $queryBuilder->getQuery();
+        $item = $query->getResult();
+        return $item;
+    }
 }

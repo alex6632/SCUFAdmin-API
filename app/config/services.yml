@@ -30,5 +30,7 @@ services:
         tags: ['controller.service_arguments']
 
     # SCUF Service
-    service.elasticsearch:
+    app.elastic_search_motor:
+        public: true
         class: ScufBundle\Service\ElasticSearchMotor
+        arguments: ['@fos_elastica.finder.app.user']

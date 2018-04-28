@@ -152,32 +152,36 @@ class UserController extends Controller
 
     /**
      * @Rest\View()
-     * @Rest\Get("/user/search")
+     * @Rest\Get("/search")
      */
     public function searchAction(Request $request)
     {
-        $searchMotor = $this->get('service.elasticsearch');
+        $searchMotor = $this->get('app.elastic_search_motor');
         $search = $request->query->get('search', '');
 
-        if ($request->isXmlHttpRequest()) {
+        //if ($request->isXmlHttpRequest()) {
+            //die('ici');
             if (strlen($search) >= ElasticSearchMotor::MIN_CHAR_USER) {
                 $searchResults = $searchMotor->searchUsers($search);
+                $result = count($searchResults) > 1 ? "utilisateurs trouvé" : "utilisateur trouvé";
                 $users[] = [
-                    'result' => 'User',
-                    'url' => null
+                    'result' => $result,
+                    'id' => null,
+                    'total' => count($searchResults),
                 ];
                 foreach ($searchResults as $user) {
                     $users[] = [
                         'result' => $user->getFirstname().' '.$user->getLastname(),
-                        'url' => $this->router->generate()
+                        'id' => $user->getId(),
                     ];
                 }
             } else {
                 $users = [];
             }
-        } else {
+        /*} else {
+            die('no xml http request');
             $users = [];
-        }
+        }*/
         return new JsonResponse($users);
     }
 
