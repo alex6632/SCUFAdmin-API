@@ -32,11 +32,11 @@ ScufBundle\Entity\User:
             groups: ['user', 'access', 'event']
         username:
             groups: ['user', 'access', 'event']
-        password:
-            groups: ['user', 'access', 'event']
         firstname:
             groups: ['user', 'access', 'event']
         lastname:
+            groups: ['user', 'access', 'event']
+        plainPassword:
             groups: ['user', 'access', 'event']
         hoursTodo:
             groups: ['user', 'access', 'event']

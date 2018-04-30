@@ -49,10 +49,14 @@ class UserController extends Controller
     public function createUserAction(Request $request)
     {
         $user = new User();
-        $form = $this->createForm(UserType::class, $user);
+        $form = $this->createForm(UserType::class, $user, ['validation_groups'=>['Default', 'New']]);
         $form->submit($request->request->all());
 
         if ($form->isValid()) {
+            $encoder = $this->get('security.password_encoder');
+            $encoded = $encoder->encodePassword($user, $user->getPlainPassword());
+            $user->setPassword($encoded);
+
             $em = $this->get('doctrine.orm.entity_manager');
             $user->setHoursTodo(0);
             $user->setHoursDone(0);
@@ -65,17 +69,18 @@ class UserController extends Controller
                 'msg' => 'Le user a bien été ajouté.',
                 'user' => $user,
             );
-            return new JsonResponse($msg);
+            return $user;
+            //return new JsonResponse($msg);
         } else {
-            //return $form;
-            $msg = array(
-                'type' => 'error',
-                'debug' => '[Error] [create|user] See UserController/createUserAction',
-                'msg' => 'Erreur lors de la création de l\'utilisateur. Veuillez réssayer.',
-                'user' => $user,
-                'form' => $form
-            );
-            return new JsonResponse($msg);
+            return $form;
+//            $msg = array(
+//                'type' => 'error',
+//                'debug' => '[Error] [create|user] See UserController/createUserAction',
+//                'msg' => 'Erreur lors de la création de l\'utilisateur. Veuillez réssayer.',
+//                'user' => $user,
+//                'form' => $form
+//            );
+//            return new JsonResponse($msg);
         }
     }
 
@@ -123,14 +128,25 @@ class UserController extends Controller
         $user = $em->getRepository('ScufBundle:User')->find($request->get('id'));
 
         if (empty($user)) {
-            return \FOS\RestBundle\View\View::create(['msg' => 'L\'utilisateur n\'a pas pu être trouvé'], Response::HTTP_NOT_FOUND);
+            return $this->userNotFound();
         }
 
-        $form = $this->createForm(UserType::class, $user);
+        if($clearMissing) {
+            $options = ['validation_groups'=>['Default', 'FullUpdate']];
+        } else {
+            $options = [];
+        }
+
+        $form = $this->createForm(UserType::class, $user, $options);
         $form->submit($request->request->all(), $clearMissing);
 
         if ($form->isValid()) {
-            $em->persist($user);
+            if(!empty($user->getPlainPassword())) {
+                $encoder = $this->get('security.password_encoder');
+                $encoded = $encoder->encodePassword($user, $user->getPlainPassword());
+                $user->setPassword($encoded);
+            }
+            $em->merge($user);
             $em->flush();
             $msg = array(
                 'type'           => 'success',
@@ -150,6 +166,11 @@ class UserController extends Controller
         }
     }
 
+    private function userNotFound()
+    {
+        return \FOS\RestBundle\View\View::create(['msg' => 'L\'utilisateur n\'a pas pu être trouvé'], Response::HTTP_NOT_FOUND);
+    }
+
     /**
      * @Rest\View()
      * @Rest\Get("/search")
@@ -163,7 +184,7 @@ class UserController extends Controller
             //die('ici');
             if (strlen($search) >= ElasticSearchMotor::MIN_CHAR_USER) {
                 $searchResults = $searchMotor->searchUsers($search);
-                $result = count($searchResults) > 1 ? "utilisateurs trouvé" : "utilisateur trouvé";
+                $result = count($searchResults) > 1 ? "utilisateurs trouvés" : "utilisateur trouvé";
                 $users[] = [
                     'result' => $result,
                     'id' => null,

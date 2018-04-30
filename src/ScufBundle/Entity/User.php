@@ -16,7 +16,7 @@ use Doctrine\ORM\Mapping\OneToMany;
  * @ORM\Table(name="user")
  * @ORM\Entity(repositoryClass="ScufBundle\Repository\UserRepository")
  */
-class User
+class User implements UserInterface
 {
     /**
      * @var int
@@ -39,7 +39,9 @@ class User
      *
      * @ORM\Column(name="password", type="string", length=255)
      */
-    private $password;
+    protected $password;
+
+    protected $plainPassword;
 
     /**
      * @var string
@@ -168,6 +170,22 @@ class User
     public function setPassword($password)
     {
         $this->password = $password;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPlainPassword()
+    {
+        return $this->plainPassword;
+    }
+
+    /**
+     * @param mixed $plainPassword
+     */
+    public function setPlainPassword($plainPassword)
+    {
+        $this->plainPassword = $plainPassword;
     }
 
     /**
@@ -418,11 +436,20 @@ class User
         $this->action = $action;
     }
 
+    public function getRoles()
+    {
+        return [];
+    }
+
     public function getSalt()
     {
-        // you *may* need a real salt depending on your encoder
-        // see section on salt below
         return null;
+    }
+
+    public function eraseCredentials()
+    {
+        // Suppression des données sensibles
+        $this->plainPassword = null;
     }
 }
 
