@@ -15,16 +15,10 @@ security:
             entity:
                 class: ScufBundle:User
                 property: username
+        auth_token_user_provider:
+            id: auth_token_user_provider
 
     firewalls:
-        secured_area:
-            anonymous: ~
-            form_login:
-                login_path: login
-                check_path: login
-            logout:
-                path: /logout
-                target: /
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
@@ -32,8 +26,11 @@ security:
         main:
             anonymous: ~
             pattern: ^/
-            http_basic: ~
-            provider: user_provider
+            # stateless : à chaque requête, l'identité de l'utilisateur est revérifiée.
+            stateless: true
+            simple_preauth:
+                authenticator: auth_token_authenticator
+            provider: auth_token_user_provider
             # activate different ways to authenticate
 
             # https://symfony.com/doc/current/security.html#a-configuring-how-your-users-will-authenticate

@@ -37,7 +37,7 @@ class UserController extends Controller
         $user = $em->getRepository('ScufBundle:User')->find($id);
 
         if (empty($user)) {
-            return new JsonResponse(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
+            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('L\'utilisateur n\'a pas pu être trouvé');
         }
         return $user;
     }
@@ -168,7 +168,7 @@ class UserController extends Controller
 
     private function userNotFound()
     {
-        return \FOS\RestBundle\View\View::create(['msg' => 'L\'utilisateur n\'a pas pu être trouvé'], Response::HTTP_NOT_FOUND);
+        throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('L\'utilisateur n\'a pas pu être trouvé');
     }
 
     /**

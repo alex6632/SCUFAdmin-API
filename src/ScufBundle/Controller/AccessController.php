@@ -99,7 +99,7 @@ class AccessController extends Controller
         $access = $em->getRepository('ScufBundle:Access')->find($request->get('id'));
 
         if (empty($access)) {
-            return \FOS\RestBundle\View\View::create(['msg' => 'L\'accès n\'a pas pu être trouvé'], Response::HTTP_NOT_FOUND);
+            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('L\'accès n\'a pas pu être trouvé');
         }
 
         $editAccessForm = $this->createForm(AccessType::class, $access);

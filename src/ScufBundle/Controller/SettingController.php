@@ -129,7 +129,7 @@ class SettingController extends Controller
         $setting = $em->getRepository('ScufBundle:Setting')->find($request->get('id'));
 
         if (empty($setting)) {
-            return \FOS\RestBundle\View\View::create(['msg' => 'Le réglage n\'a pas pu être trouvé'], Response::HTTP_NOT_FOUND);
+            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('Le réglage n\'a pas pu être trouvé');
         }
 
         $editSettingForm = $this->createForm(SettingType::class, $setting);
