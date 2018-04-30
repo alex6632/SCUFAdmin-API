@@ -15,3 +15,12 @@ ScufBundle\Entity\User:
             - Length:
                 min: 4
                 max: 50
+
+ScufBundle\Entity\Credentials:
+    properties:
+        login:
+            - NotBlank: ~
+            - Type: string
+        password:
+            - NotBlank: ~
+            - Type: string

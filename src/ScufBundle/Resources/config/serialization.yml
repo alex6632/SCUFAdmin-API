@@ -29,32 +29,43 @@ ScufBundle\Entity\Event:
 ScufBundle\Entity\User:
     attributes:
         id:
-            groups: ['user', 'access', 'event']
+            groups: ['user', 'access', 'event', 'auth-token']
         username:
-            groups: ['user', 'access', 'event']
+            groups: ['user', 'access', 'event', 'auth-token']
         firstname:
-            groups: ['user', 'access', 'event']
+            groups: ['user', 'access', 'event', 'auth-token']
         lastname:
-            groups: ['user', 'access', 'event']
+            groups: ['user', 'access', 'event', 'auth-token']
         plainPassword:
-            groups: ['user', 'access', 'event']
+            groups: ['user', 'access', 'event', 'auth-token']
         hoursTodo:
-            groups: ['user', 'access', 'event']
+            groups: ['user', 'access', 'event', 'auth-token']
         hoursDone:
-            groups: ['user', 'access', 'event']
+            groups: ['user', 'access', 'event', 'auth-token']
         hoursPlanified:
-            groups: ['user', 'access', 'event']
+            groups: ['user', 'access', 'event', 'auth-token']
         hoursPlanifiedByMe:
-            groups: ['user', 'access', 'event']
+            groups: ['user', 'access', 'event', 'auth-token']
         overtime:
-            groups: ['user', 'access', 'event']
+            groups: ['user', 'access', 'event', 'auth-token']
         role:
-            groups: ['user', 'access', 'event']
+            groups: ['user', 'access', 'event', 'auth-token']
         superior:
-            groups: ['user', 'access', 'event']
+            groups: ['user', 'access', 'event', 'auth-token']
         action:
-            groups: ['user', 'access', 'event']
+            groups: ['user', 'access', 'event', 'auth-token']
         event:
             groups: ['user']
         access:
             groups: ['user']
+
+ScufBundle\Entity\AuthToken:
+    attributes:
+        id:
+            groups: ['auth-token']
+        value:
+            groups: ['auth-token']
+        created:
+            groups: ['auth-token']
+        user:
+            groups: ['auth-token']

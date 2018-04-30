@@ -125,6 +125,11 @@ class User implements UserInterface
      */
     private $action;
 
+    /**
+     * @OneToMany(targetEntity="AuthToken", mappedBy="user", cascade={"remove"})
+     */
+    private $token;
+
     public function __construct() {
         $this->access = new ArrayCollection();
         $this->event = new ArrayCollection();
@@ -434,6 +439,22 @@ class User implements UserInterface
     public function setAction($action)
     {
         $this->action = $action;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getToken()
+    {
+        return $this->token;
+    }
+
+    /**
+     * @param mixed $token
+     */
+    public function setToken($token)
+    {
+        $this->token = $token;
     }
 
     public function getRoles()

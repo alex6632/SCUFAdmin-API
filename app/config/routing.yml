@@ -17,3 +17,7 @@ setting:
 user:
     type: rest
     resource: ScufBundle\Controller\UserController
+
+auth-tokens:
+    type: rest
+    resource: ScufBundle\Controller\AuthTokenController
