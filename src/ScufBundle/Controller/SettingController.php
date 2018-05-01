@@ -48,14 +48,14 @@ class SettingController extends Controller
                 $msg = array(
                     'type'   => 'error',
                     'debug'  => '[Error field is missing] [create|setting|title] See SettingController/createSettingAction',
-                    'msg'    => 'Le champs "titre" est obligatoire, veuillez le renseigner.'
+                    'message'    => 'Le champs "titre" est obligatoire, veuillez le renseigner.'
                 );
             }
             if(empty($form['value'])) {
                 $msg = array(
                     'type'   => 'error',
                     'debug'  => '[Error field is missing] [create|setting|value] See SettingController/createSettingAction',
-                    'msg'    => 'Le champs "valeur" est obligatoire, veuillez le renseigner.'
+                    'message'    => 'Le champs "valeur" est obligatoire, veuillez le renseigner.'
                 );
             }
             if(!empty($form['value']) && $form['is_int'] == 1) {
@@ -67,7 +67,7 @@ class SettingController extends Controller
                 $em->flush();
                 $msg = array(
                     'type'       => 'success',
-                    'msg'        => 'Le réglage "'.$form['title'].'" a bien été ajouté.',
+                    'message'        => 'Le réglage "'.$form['title'].'" a bien été ajouté.',
                     'title'      => $form['title'],
                     'value'      => $form['value'],
                     'is_int'     => $form['is_int'],
@@ -80,7 +80,7 @@ class SettingController extends Controller
         $msg = array(
             'type' => 'error',
             'debug'  => '[Error] [create|setting] See SettingController/createSettingAction',
-            'msg'  => 'Erreur lors de la création du réglage. Veuillez réssayer.'
+            'message'  => 'Erreur lors de la création du réglage. Veuillez réssayer.'
         );
         return new JsonResponse($msg);
     }
@@ -98,7 +98,7 @@ class SettingController extends Controller
 
         $msg = array(
             'type' => 'success',
-            'msg'  => 'Le réglage a bien été supprimé.',
+            'message'  => 'Le réglage a bien été supprimé.',
             'id' => $id
         );
         return new JsonResponse($msg);
@@ -140,7 +140,7 @@ class SettingController extends Controller
             $em->flush();
             $msg = array(
                 'type'       => 'success',
-                'msg'        => 'Le réglage '.$setting->getTitle().' a bien été édité.',
+                'message'        => 'Le réglage '.$setting->getTitle().' a bien été édité.',
                 'title'      => $setting->getTitle(),
                 'value'      => $setting->getValue(),
                 'id'         => $setting->getId()

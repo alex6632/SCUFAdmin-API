@@ -66,7 +66,7 @@ class UserController extends Controller
             $em->flush();
             $msg = array(
                 'type' => 'success',
-                'msg' => 'Le user a bien été ajouté.',
+                'message' => 'Le user a bien été ajouté.',
                 'user' => $user,
             );
             return $user;
@@ -97,7 +97,7 @@ class UserController extends Controller
 
         $msg = array(
             'type' => 'success',
-            'msg'  => 'L\'utilisateur a bien été supprimé.',
+            'message'  => 'L\'utilisateur a bien été supprimé.',
             'id' => $id
         );
         return new JsonResponse($msg);
@@ -150,7 +150,7 @@ class UserController extends Controller
             $em->flush();
             $msg = array(
                 'type'           => 'success',
-                'msg'            => 'L\'utilisateur "'.$user->getFirstname().' ' .$user->getLastname() .'" a bien été édité.',
+                'message'            => 'L\'utilisateur "'.$user->getFirstname().' ' .$user->getLastname() .'" a bien été édité.',
                 'firstname'      => $user->getFirstname(),
                 'lastname'       => $user->getLastname(),
                 'username'       => $user->getUsername(),

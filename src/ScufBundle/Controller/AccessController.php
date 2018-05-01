@@ -40,14 +40,14 @@ class AccessController extends Controller
             $em->flush();
             $msg = array(
                 'type' => 'success',
-                'msg' => 'Le droit a bien été ajouté.',
+                'message' => 'Le droit a bien été ajouté.',
                 'access' => $access,
             );
         } else {
             $msg = array(
                 'type' => 'error',
                 'debug' => '[Error] [create|access] See AccessController/createAccessAction',
-                'msg' => 'Erreur lors de la création du droit. Veuillez réssayer.'
+                'message' => 'Erreur lors de la création du droit. Veuillez réssayer.'
             );
         }
         return new JsonResponse($msg);
@@ -68,7 +68,7 @@ class AccessController extends Controller
         }
         $msg = array(
             'type' => 'success',
-            'msg'  => 'Le droit a bien été supprimé.',
+            'message'  => 'Le droit a bien été supprimé.',
             'id' => $id,
         );
         return new JsonResponse($msg);
@@ -110,7 +110,7 @@ class AccessController extends Controller
             $em->flush();
             $msg = array(
                 'type'       => 'success',
-                'msg'        => 'Le droit '.$access->getTitle().' a bien été édité.',
+                'message'        => 'Le droit '.$access->getTitle().' a bien été édité.',
                 'title'      => $access->getTitle(),
                 'id'         => $access->getId(),
             );

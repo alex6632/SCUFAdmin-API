@@ -59,7 +59,7 @@ class AuthTokenController extends Controller
 
     private function invalidCredentials()
     {
-        return \FOS\RestBundle\View\View::create(['msg' => 'Invalid credentials'], Response::HTTP_BAD_REQUEST);
+        throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('L\'identifiant et/ou le mot de passe indiqué(s) semble(nt) incorrect(s)');
     }
 
     /**
