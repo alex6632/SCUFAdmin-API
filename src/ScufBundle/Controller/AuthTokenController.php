@@ -5,6 +5,7 @@ namespace ScufBundle\Controller;
 use ScufBundle\Entity\AuthToken;
 use ScufBundle\Entity\Credentials;
 use ScufBundle\Form\CredentialsType;
+use ScufBundle\Security\AuthTokenAuthenticator;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,7 +27,6 @@ class AuthTokenController extends Controller
         $form->submit($request->request->all());
 
         if(!$form->isValid()) {
-            // return msg...
             return $form;
         }
 
@@ -53,8 +53,13 @@ class AuthTokenController extends Controller
         $em->persist($authToken);
         $em->flush();
 
-        // return msg...
-        return $authToken;
+        $created = $authToken->getCreated()->getTimestamp();
+        $message = array(
+            'authToken' => $authToken,
+            'createdTime' => $created,
+            'tokenValidityDuration' => AuthTokenAuthenticator::TOKEN_VALIDITY_DURATION
+        );
+        return $message;
     }
 
     private function invalidCredentials()

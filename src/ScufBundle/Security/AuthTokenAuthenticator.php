@@ -77,7 +77,6 @@ class AuthTokenAuthenticator implements SimplePreAuthenticatorInterface, Authent
 
         // Nos utilisateurs n'ont pas de role particulier, on doit donc forcer l'authentification du token
         $pre->setAuthenticated(true);
-
         return $pre;
     }
 
