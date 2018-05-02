@@ -15,6 +15,7 @@ class SettingType extends AbstractType
     {
         $builder
             ->add('title', TextType::class, array('label' => 'Nom'))
+            ->add('slug', TextType::class, array('label' => 'Identifiant'))
             ->add('value', TextType::class, array('label' => 'Valeur'))
             ->add('is_int', ChoiceType::class, array('label' => 'Cocher si la valeur est un nombre'))
         ;

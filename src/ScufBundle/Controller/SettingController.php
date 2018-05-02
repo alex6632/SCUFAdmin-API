@@ -26,6 +26,22 @@ class SettingController extends Controller
 
     /**
      * @Rest\View()
+     * @Rest\Get("/setting/{slug}")
+     */
+    public function oneSettingAction($slug)
+    {
+        $em = $this->get('doctrine.orm.entity_manager');
+
+        $setting = $em->getRepository('ScufBundle:Setting')->findOneBySlug($slug);
+
+        if (empty($setting)) {
+            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('Le réglage n\'a pas pu être trouvé');
+        }
+        return $setting;
+    }
+
+    /**
+     * @Rest\View()
      * @Rest\Post("/setting/create")
      */
     public function createSettingAction(Request $request)

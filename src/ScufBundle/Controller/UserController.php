@@ -32,7 +32,6 @@ class UserController extends Controller
      */
     public function oneUserAction($id)
     {
-        //$em = $this->getDoctrine()->getEntityManager();
         $em = $this->get('doctrine.orm.entity_manager');
         $user = $em->getRepository('ScufBundle:User')->find($id);
 
@@ -58,7 +57,7 @@ class UserController extends Controller
             $user->setPassword($encoded);
 
             $em = $this->get('doctrine.orm.entity_manager');
-            $user->setHoursTodo(0);
+            $user->setHoursPlanified(0);
             $user->setHoursDone(0);
             $user->setHoursPlanifiedByMe(0);
             $user->setOvertime(0);
