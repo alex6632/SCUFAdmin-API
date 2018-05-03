@@ -34,11 +34,13 @@ class UserController extends Controller
     {
         $em = $this->get('doctrine.orm.entity_manager');
         $user = $em->getRepository('ScufBundle:User')->find($id);
+        $superior = $user->getSuperior();
+        $superiorName = $superior->getFirstname()." ".$superior->getLastname();
 
         if (empty($user)) {
             throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('L\'utilisateur n\'a pas pu être trouvé');
         }
-        return $user;
+        return [$user, $superiorName];
     }
 
     /**
