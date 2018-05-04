@@ -18,6 +18,10 @@ user:
     type: rest
     resource: ScufBundle\Controller\UserController
 
+action:
+    type: rest
+    resource: ScufBundle\Controller\ActionController
+
 auth-tokens:
     type: rest
     resource: ScufBundle\Controller\AuthTokenController

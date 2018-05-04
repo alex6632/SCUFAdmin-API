@@ -40,6 +40,7 @@ class Action
      * @var \DateTime
      *
      * @ORM\Column(name="updated", type="datetime")
+     * @ORM\JoinColumn(nullable=true)
      */
     private $updated;
 
@@ -58,29 +59,41 @@ class Action
     private $end;
 
     /**
-     * @var bool
+     * @var string
      *
-     * @ORM\Column(name="status", type="boolean")
+     * @ORM\Column(name="justification", type="string", length=255)
+     */
+    private $justification;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="status", type="integer")
      */
     private $status;
 
     /**
-     * @var bool
+     * @var int
      *
-     * @ORM\Column(name="view", type="boolean")
+     * @ORM\Column(name="view", type="integer")
      */
     private $view;
 
     /**
      * @ManyToOne(targetEntity="User", inversedBy="actions")
-     * @ORM\JoinColumn(nullable=true)
+     * @ORM\JoinColumn(name="user_id")
      */
     private $user;
 
-    /**
+    /*
      * @var int
      *
      * @ORM\Column(name="recipient", type="integer")
+     */
+
+    /**
+     * @ManyToOne(targetEntity="User", inversedBy="actions")
+     * @ORM\JoinColumn(name="recipient_id")
      */
     private $recipient;
 
@@ -212,6 +225,22 @@ class Action
     public function getEnd()
     {
         return $this->end;
+    }
+
+    /**
+     * @return string
+     */
+    public function getJustification()
+    {
+        return $this->justification;
+    }
+
+    /**
+     * @param string $justification
+     */
+    public function setJustification($justification)
+    {
+        $this->justification = $justification;
     }
 
     /**
