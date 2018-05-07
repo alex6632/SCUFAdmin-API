@@ -92,7 +92,7 @@ class Action
 
     /**
      * @ManyToOne(targetEntity="User", inversedBy="actions")
-     * @ORM\JoinColumn(name="recipient_id")
+     * @ORM\JoinColumn(name="recipient_id", onDelete="SET NULL")
      */
     private $recipient;
 

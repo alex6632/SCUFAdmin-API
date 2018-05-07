@@ -35,7 +35,7 @@ class UserController extends Controller
         $em = $this->get('doctrine.orm.entity_manager');
         $user = $em->getRepository('ScufBundle:User')->find($id);
         $superior = $user->getSuperior();
-        $superiorName = $superior->getFirstname()." ".$superior->getLastname();
+        $superiorName = $superior != null ? $superior->getFirstname()." ".$superior->getLastname() : "Aucun supérieur n'est rattaché.";
 
         if (empty($user)) {
             throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('L\'utilisateur n\'a pas pu être trouvé');
@@ -74,8 +74,7 @@ class UserController extends Controller
                 'message' => 'Le user a bien été ajouté.',
                 'user' => $user,
             );
-            return $user;
-            //return new JsonResponse($msg);
+            return $msg;
         } else {
             return $form;
 //            $msg = array(
