@@ -3,7 +3,7 @@
 namespace ScufBundle\Controller;
 
 use ScufBundle\Entity\Action;
-use ScufBundle\Form\Action\LeaveType;
+use ScufBundle\Form\ActionType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -30,13 +30,16 @@ class ActionController extends Controller
         $formattedActions = [];
         foreach ($actions as $action) {
             $updated = !is_null($action['updated']) ? $action['created']->format('d-m-Y') : "/";
+            $start = $type == "hours" ? $action['start']->format('d-m-Y à H:i:s') : $action['start']->format('d-m-Y');
+            $end = $type == "hours" ? $action['end']->format('H:i:s') : $action['end']->format('d-m-Y');
             $formattedActions[] = [
                 'id' => $action['id'],
                 'user' => $action['user'],
+                'recipient' => $action['recipient'],
                 'created' => $action['created']->format('d-m-Y à H:i:s'),
                 'updated' => $updated,
-                'start' => $action['start']->format('d-m-Y'),
-                'end' => $action['end']->format('d-m-Y'),
+                'start' => $start,
+                'end' => $end,
                 'justification' => $action['justification'],
                 'status' => $action['status'],
             ];
@@ -51,7 +54,7 @@ class ActionController extends Controller
     public function createAction(Request $request, $type, $userID)
     {
         $action = new Action();
-        $form = $this->createForm(LeaveType::class, $action);
+        $form = $this->createForm(ActionType::class, $action);
         $form->submit($request->request->all());
 
         if ($form->isValid()) {

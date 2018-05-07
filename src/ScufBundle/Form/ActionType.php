@@ -1,6 +1,6 @@
 <?php
 
-namespace ScufBundle\Form\Action;
+namespace ScufBundle\Form;
 
 use ScufBundle\Entity\User;
 use Symfony\Component\Form\AbstractType;
@@ -12,7 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class LeaveType extends AbstractType
+class ActionType extends AbstractType
 {
 
     public function buildForm(FormBuilderInterface $builder, array $options)

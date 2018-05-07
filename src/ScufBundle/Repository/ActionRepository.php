@@ -13,7 +13,7 @@ class ActionRepository extends \Doctrine\ORM\EntityRepository
     public function findActionByTypeAndUser($type, $userID)
     {
         $queryBuilder = $this->_em->createQueryBuilder('a')
-            ->select('a.id, a.created, a.updated, a.start, a.end, a.status, a.justification, (a.user) AS user')
+            ->select('a.id, a.created, a.updated, a.start, a.end, a.status, a.justification, (a.user) AS user, (a.recipient) AS recipient')
             ->from('ScufBundle:Action', 'a')
             ->where('a.type = :type AND a.user = :id')
             ->setParameter('type', $type)

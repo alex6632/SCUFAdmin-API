@@ -28,6 +28,17 @@ class UserController extends Controller
 
     /**
      * @Rest\View(serializerGroups={"user"})
+     * @Rest\Get("/users/{id}")
+     */
+    public function listEmployeesFromUserAction($id)
+    {
+        $em = $this->get('doctrine.orm.entity_manager');
+        $employeesList = $em->getRepository('ScufBundle:User')->findBySuperior($id);
+        return $employeesList;
+    }
+
+    /**
+     * @Rest\View(serializerGroups={"user"})
      * @Rest\Get("/user/{id}")
      */
     public function oneUserAction($id)
