@@ -55,8 +55,12 @@ class UserController extends Controller
 
         if ($form->isValid()) {
             $encoder = $this->get('security.password_encoder');
-            $encoded = $encoder->encodePassword($user, $user->getPlainPassword());
-            $user->setPassword($encoded);
+            if($user->getPlainPassword() == $user->getConfirmPassword()) {
+                $encoded = $encoder->encodePassword($user, $user->getPlainPassword());
+                $user->setPassword($encoded);
+            } else {
+                throw new \Exception('Les mots de passe doivent être identiques !');
+            }
 
             $em = $this->get('doctrine.orm.entity_manager');
             $user->setHoursPlanified(0);
@@ -144,8 +148,22 @@ class UserController extends Controller
         if ($form->isValid()) {
             if(!empty($user->getPlainPassword())) {
                 $encoder = $this->get('security.password_encoder');
-                $encoded = $encoder->encodePassword($user, $user->getPlainPassword());
-                $user->setPassword($encoded);
+                // Check previous password
+                $previousPassword = $user->getPreviousPassword();
+                $isPasswordValid = $encoder->isPasswordValid($user, $previousPassword);
+
+                //$actualPassword = $em->getRepository('ScufBundle:User')->findOneById($request->get('id'))->getPassword();
+
+                if($isPasswordValid) {
+                    if($user->getPlainPassword() == $user->getConfirmPassword()) {
+                        $encoded = $encoder->encodePassword($user, $user->getPlainPassword());
+                        $user->setPassword($encoded);
+                    } else {
+                        throw new \Exception('Les mots de passe doivent être identiques !');
+                    }
+                } else {
+                    throw new \Exception('Votre mot de passe actuel est incorrect !');
+                }
             }
             $em->merge($user);
             $em->flush();

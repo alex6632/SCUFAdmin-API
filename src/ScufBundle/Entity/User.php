@@ -41,7 +41,11 @@ class User implements UserInterface
      */
     protected $password;
 
+    protected $previousPassword;
+
     protected $plainPassword;
+
+    protected $confirmPassword;
 
     /**
      * @var string
@@ -180,6 +184,22 @@ class User implements UserInterface
     /**
      * @return mixed
      */
+    public function getPreviousPassword()
+    {
+        return $this->previousPassword;
+    }
+
+    /**
+     * @param mixed $previousPassword
+     */
+    public function setPreviousPassword($previousPassword)
+    {
+        $this->previousPassword = $previousPassword;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getPlainPassword()
     {
         return $this->plainPassword;
@@ -191,6 +211,22 @@ class User implements UserInterface
     public function setPlainPassword($plainPassword)
     {
         $this->plainPassword = $plainPassword;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getConfirmPassword()
+    {
+        return $this->confirmPassword;
+    }
+
+    /**
+     * @param mixed $confirmPassword
+     */
+    public function setConfirmPassword($confirmPassword)
+    {
+        $this->confirmPassword = $confirmPassword;
     }
 
     /**

@@ -22,7 +22,9 @@ class UserType extends AbstractType
         $builder
             ->add('username', TextType::class)
             ->add('password', PasswordType::class)
+            ->add('previous_password', TextType::class)
             ->add('plain_password', TextType::class)
+            ->add('confirm_password', TextType::class)
             ->add('firstname', TextType::class)
             ->add('lastname', TextType::class)
             ->add('hours_todo', IntegerType::class)
