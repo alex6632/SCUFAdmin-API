@@ -5,6 +5,7 @@ namespace ScufBundle\Controller;
 use ScufBundle\Entity\Action;
 use ScufBundle\Form\Action\LeaveType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,41 +13,42 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 
 class ActionController extends Controller
 {
-
     /**
      * @Rest\View()
-     * @Rest\Get("/actions")
+     * @Rest\Get("/actions/{type}/{userID}")
      */
-    public function listAction()
-    {
-        //$em = $this->getDoctrine()->getEntityManager();
-        $em = $this->get('doctrine.orm.entity_manager');
-        $userList = $em->getRepository('ScufBundle:User')->findAll();
-        return $userList;
-    }
-
-    /**
-     * @Rest\View()
-     * @Rest\Get("/action/{id}")
-     */
-    public function oneAction($id)
+    public function listByUserAction($type, $userID)
     {
         $em = $this->get('doctrine.orm.entity_manager');
-        $action = $em->getRepository('ScufBundle:Action')->find($id);
-//        $superior = $user->getSuperior();
-//        $superiorName = $superior->getFirstname()." ".$superior->getLastname();
 
-        if (empty($action)) {
-            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('L\'utilisateur n\'a pas pu être trouvé');
+        $actions = $em->getRepository('ScufBundle:Action')->findActionByTypeAndUser($type, $userID);
+
+        if (empty($actions)) {
+            return $this->ActionNotFound();
         }
-        return $action;
+
+        $formattedActions = [];
+        foreach ($actions as $action) {
+            $updated = !is_null($action['updated']) ? $action['created']->format('d-m-Y') : "/";
+            $formattedActions[] = [
+                'id' => $action['id'],
+                'user' => $action['user'],
+                'created' => $action['created']->format('d-m-Y à H:i:s'),
+                'updated' => $updated,
+                'start' => $action['start']->format('d-m-Y'),
+                'end' => $action['end']->format('d-m-Y'),
+                'justification' => $action['justification'],
+                'status' => $action['status'],
+            ];
+        }
+        return $formattedActions;
     }
 
     /**
-     * @Rest\View(statusCode=Response::HTTP_CREATED)
-     * @Rest\Post("/action/create/{userID}")
+     * @Rest\View(serializerGroups={"action"}, statusCode=Response::HTTP_CREATED)
+     * @Rest\Post("/action/create/{type}/{userID}")
      */
-    public function createAction(Request $request, $userID)
+    public function createAction(Request $request, $type, $userID)
     {
         $action = new Action();
         $form = $this->createForm(LeaveType::class, $action);
@@ -54,19 +56,59 @@ class ActionController extends Controller
 
         if ($form->isValid()) {
             $em = $this->get('doctrine.orm.entity_manager');
-            $superior = $em->getRepository('ScufBundle:User')->getSuperior($userID);
-            dump($superior);
-            die();
-            $action->setCreated(new \DateTime('now'));
+            $user = $em->getRepository('ScufBundle:User')->find($userID);
+
+            if($type == "leave" || $type == "rest") {
+                $superiorID = $em->getRepository('ScufBundle:User')->getSuperior($userID);
+                $recipient = $em->getRepository('ScufBundle:User')->find($superiorID[0][1]);
+                $action->setRecipient($recipient);
+            }
+            if($type == "rest") {
+                // Get start & end date of form
+                $startHours = substr($request->request->get('start'), 11, 2);
+                $startMinutes = substr($request->request->get('start'), 14, 2);
+                $endHours = substr($request->request->get('end'), 11, 2);
+                $endMinutes = substr($request->request->get('end'), 14, 2);
+
+                if($startMinutes == 00 || $startMinutes == 15 || $startMinutes == 30 || $startMinutes == 45) {
+                    if($endMinutes == 00 || $endMinutes == 15 || $endMinutes == 30 || $endMinutes == 45) {
+                        $start = ($startHours * 60) + $startMinutes;
+                        $end = ($endHours * 60) + $endMinutes;
+                    } else {
+                        throw new \Exception('L\'heure de fin est incorrecte !');
+                    }
+                } else {
+                    throw new \Exception('L\'heure de début est incorrecte !');
+                }
+
+                // Get rest value from database
+                $overtime = $em->getRepository('ScufBundle:User')->findOneById($userID)->getOvertime();
+                $coefficient = $em->getRepository('ScufBundle:Setting')->findOneBySlug('coeff')->getValue();
+                $restOwned = number_format($overtime * $coefficient, 2);
+
+                if($start < $end) {
+                    $restWanted = $end - $start;
+                    if($restWanted <= $restOwned) {
+                        $newOvertime = number_format(($restOwned - $restWanted) / $coefficient, 2);
+                        $user = $em->getRepository('ScufBundle:User')->findOneById($userID)->setOvertime($newOvertime);
+                    } else {
+                        throw new \Exception('Vous n\'avez pas cumulé assez d\'heures pour cette demande !');
+                    }
+                } else {
+                    throw new \Exception('La date de fin doit être ultérieure à la date de début !');
+                }
+            }
+            $now = new \DateTime('now');
+            $now->setTimezone(new \DateTimeZone('Europe/Paris'));
+            $action->setCreated($now);
             $action->setStatus(2); //By default, status is "In progress"
             $action->setView(0);
-            $action->setRecipient($superior);
+            $action->setUser($user);
+
             $em->persist($action);
             $em->flush();
             $message = array(
-                'type' => 'success',
-                'message' => 'Votre demande a bien été enregistré. Vous recevrez une notification
-                 lorsque son statut évoluera.',
+                'message' => 'Votre demande a bien été enregistrée. Vous recevrez une notification lorsque son statut évoluera.',
                 'action' => $action,
             );
             return $message;
@@ -77,49 +119,55 @@ class ActionController extends Controller
 
     /**
      * @Rest\View()
-     * @Rest\DELETE("/user/delete/{id}")
+     * @Rest\DELETE("/action/delete/{id}")
      */
-    public function deleteUserAction(Request $request, $id)
+    public function deleteAction($id)
     {
-        $em = $this->getDoctrine()->getEntityManager();
-        $setting = $em->getRepository('ScufBundle:User')->find($id);
-        $em->remove($setting);
+        $em = $this->get('doctrine.orm.entity_manager');
+        $action = $em->getRepository('ScufBundle:Action')->find($id);
+
+        if (empty($action)) {
+            return $this->ActionNotFound();
+        }
+
+        $em->remove($action);
         $em->flush();
 
         $msg = array(
-            'type' => 'success',
-            'message'  => 'L\'utilisateur a bien été supprimé.',
-            'id' => $id
+            'message'  => 'L\'action a bien été supprimée.',
+            'id' => $id,
+            'user' => $action->getUser()->getId()
         );
         return new JsonResponse($msg);
     }
 
+
     /**
      * @Rest\View()
-     * @Rest\Put("/user/update/{id}")
+     * @Rest\Put("/action/update/{type}/{id}")
      */
-    public function editUserAction(Request $request)
+    public function putAction(Request $request)
     {
-        return $this->editUser($request, true);
+        return $this->editAction($request, true);
     }
 
     /**
      * @Rest\View()
-     * @Rest\Patch("/user/update/{id}")
+     * @Rest\Patch("action/update/{type}/{id}")
      */
-    public function patchUserAction(Request $request)
+    public function patchAction(Request $request)
     {
-        return $this->editUser($request, false);
+        return $this->editAction($request, false);
     }
 
 
-    private function editUser(Request $request,  $clearMissing)
+    private function editAction(Request $request,  $clearMissing)
     {
         $em = $this->getDoctrine()->getManager();
         $user = $em->getRepository('ScufBundle:User')->find($request->get('id'));
 
         if (empty($user)) {
-            return $this->userNotFound();
+            return $this->ActionNotFound();
         }
 
         if($clearMissing) {
@@ -157,9 +205,9 @@ class ActionController extends Controller
         }
     }
 
-    private function userNotFound()
+    private function ActionNotFound()
     {
-        throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('L\'utilisateur n\'a pas pu être trouvé');
+        throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('Aucune action trouvée.');
     }
 
 

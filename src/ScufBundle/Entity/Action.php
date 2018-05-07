@@ -39,8 +39,7 @@ class Action
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="updated", type="datetime")
-     * @ORM\JoinColumn(nullable=true)
+     * @ORM\Column(name="updated", type="datetime", nullable=true)
      */
     private $updated;
 

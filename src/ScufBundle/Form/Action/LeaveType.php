@@ -19,10 +19,24 @@ class LeaveType extends AbstractType
     {
         $builder
             ->add('type', TextType::class)
-            ->add('created', DateTimeType::class)
-            ->add('updated', DateTimeType::class)
-            ->add('start', DateType::class)
-            ->add('end', DateType::class)
+            ->add('created', DateTimeType::class, [
+                'model_timezone' => 'UTC',
+                'view_timezone'  => 'Europe/Paris'
+            ])
+            ->add('updated', DateTimeType::class, [
+                'model_timezone' => 'UTC',
+                'view_timezone'  => 'Europe/Paris'
+            ])
+            ->add('start', DateTimeType::class, [
+                'widget' => 'single_text',
+                'format' => 'dd-MM-yyyy HH:mm',
+                //'format' => 'yyyy-MM-dd HH:mm:ss',
+            ])
+            ->add('end', DateTimeType::class, [
+                'widget' => 'single_text',
+                'format' => 'dd-MM-yyyy HH:mm',
+                //'format' => 'yyyy-MM-dd HH:mm:ss',
+            ])
             ->add('status', IntegerType::class)
             ->add('view', IntegerType::class)
             ->add('user', EntityType::class, array('class' => User::class))

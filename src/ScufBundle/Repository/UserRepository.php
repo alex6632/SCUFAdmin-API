@@ -24,7 +24,7 @@ class UserRepository extends \Doctrine\ORM\EntityRepository
     public function getSuperior($userID)
     {
         $queryBuilder = $this->_em->createQueryBuilder('u')
-            ->select('IDENTITY(u.superior)')
+            ->select('(u.superior)')
             ->from('ScufBundle:User', 'u')
             ->where('u.id = :id')
             ->setParameter('id', $userID);

@@ -26,6 +26,31 @@ ScufBundle\Entity\Event:
         users:
             groups: ['event']
 
+ScufBundle\Entity\Action:
+    attributes:
+        id:
+            groups: ['user', 'action']
+        type:
+            groups: ['user', 'action']
+        created:
+            groups: ['user', 'action']
+        updated:
+            groups: ['user', 'action']
+        start:
+            groups: ['user', 'action']
+        end:
+            groups: ['user', 'action']
+        status:
+            groups: ['user', 'action']
+        view:
+            groups: ['user', 'action']
+        justification:
+            groups: ['user', 'action']
+        user:
+            groups: ['action']
+        recipient:
+            groups: ['action']
+
 ScufBundle\Entity\User:
     attributes:
         id:
@@ -53,7 +78,7 @@ ScufBundle\Entity\User:
         superior:
             groups: ['user', 'access', 'event', 'auth-token']
         action:
-            groups: ['user', 'access', 'event', 'auth-token']
+            groups: ['user']
         event:
             groups: ['user']
         access:
