@@ -22,4 +22,28 @@ class ActionRepository extends \Doctrine\ORM\EntityRepository
         $actions = $query->getResult();
         return $actions;
     }
+
+    public function findNotificationByUser($userID)
+    {
+        $queryBuilder = $this->_em->createQueryBuilder('a')
+            ->select('a.id, a.created, a.updated, a.start, a.end, a.status, a.justification, (a.user) AS user, (a.recipient) AS recipient, a.type, a.view')
+            ->from('ScufBundle:Action', 'a')
+            ->where('a.recipient = :id')
+            ->setParameter('id', $userID);
+        $query = $queryBuilder->getQuery();
+        $notifications = $query->getResult();
+        return $notifications;
+    }
+
+    public function countNotificationByUser($userID)
+    {
+        $queryBuilder = $this->_em->createQueryBuilder('a')
+            ->select('COUNT(a.id) AS count')
+            ->from('ScufBundle:Action', 'a')
+            ->where('a.recipient = :id')
+            ->setParameter('id', $userID);
+        $query = $queryBuilder->getQuery();
+        $countNotifications = $query->getResult();
+        return $countNotifications;
+    }
 }

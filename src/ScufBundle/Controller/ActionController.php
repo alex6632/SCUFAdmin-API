@@ -20,31 +20,117 @@ class ActionController extends Controller
     public function listByUserAction($type, $userID)
     {
         $em = $this->get('doctrine.orm.entity_manager');
-
         $actions = $em->getRepository('ScufBundle:Action')->findActionByTypeAndUser($type, $userID);
 
         if (empty($actions)) {
-            return $this->ActionNotFound();
+            return [
+                'success' => false,
+                'message' => 'Aucune demande n\'a été soumise pour le moment !'
+            ];
         }
 
         $formattedActions = [];
         foreach ($actions as $action) {
             $updated = !is_null($action['updated']) ? $action['created']->format('d-m-Y') : "/";
-            $start = $type == "hours" ? $action['start']->format('d-m-Y à H:i:s') : $action['start']->format('d-m-Y');
-            $end = $type == "hours" ? $action['end']->format('H:i:s') : $action['end']->format('d-m-Y');
+            $start = $action['start']->format('d-m-Y à H:i');
+            $startDate = $action['start']->format('d-m-Y');
+            $end = $action['end']->format('d-m-Y à H:i');
+            $endDate = $action['end']->format('d-m-Y');
+            $startHours = $action['start']->format('H:i');
+            $endHours = $action['end']->format('H:i');
+            $recipient = $em->getRepository('ScufBundle:User')->findOneById($action['recipient']);
+            $recipientFirstName = $recipient->getFirstname();
+            $recipientLastName = $recipient->getLastname();
+
             $formattedActions[] = [
+                'success' => true,
                 'id' => $action['id'],
                 'user' => $action['user'],
-                'recipient' => $action['recipient'],
-                'created' => $action['created']->format('d-m-Y à H:i:s'),
+                'recipientFirstName' => $recipientFirstName,
+                'recipientLastName' => $recipientLastName,
+                'created' => $action['created']->format('d-m-Y à H:i'),
                 'updated' => $updated,
                 'start' => $start,
+                'startDate' => $startDate,
                 'end' => $end,
+                'endDate' => $endDate,
+                'startHours' => $startHours,
+                'endHours' => $endHours,
                 'justification' => $action['justification'],
                 'status' => $action['status'],
             ];
         }
-        return $formattedActions;
+        return [
+            'success' => true,
+            'list' => $formattedActions,
+        ];
+    }
+
+    /**
+     * @Rest\View()
+     * @Rest\Get("/notifications/{userID}")
+     */
+    public function notificationAction($userID)
+    {
+        $em = $this->get('doctrine.orm.entity_manager');
+        $notifications = $em->getRepository('ScufBundle:Action')->findNotificationByUser($userID);
+        if (empty($notifications)) {
+            return $this->ActionNotFound();
+        }
+        $recipientFirstName = "";
+        $recipientLastName = "";
+        $userFirstName = "";
+        $userLastName = "";
+        $count = count($notifications);
+        $formattedActions = [];
+        foreach ($notifications as $notification) {
+            $updated = !is_null($notification['updated']) ? $notification['created']->format('d/m/Y à H:i') : "";
+            $startDate = $notification['start']->format('d/m/Y');
+            $endDate = $notification['end']->format('d/m/Y');
+            $startHours = $notification['start']->format('H:i');
+            $endHours = $notification['end']->format('H:i');
+            $recipient = $em->getRepository('ScufBundle:User')->findOneById($notification['recipient']);
+            $recipientFirstName = $recipient->getFirstname();
+            $recipientLastName = $recipient->getLastname();
+            $user = $em->getRepository('ScufBundle:User')->findOneById($notification['user']);
+            $userFirstName = $user->getFirstname();
+            $userLastName = $user->getLastname();
+
+            $formattedActions[] = [
+                'id'             => $notification['id'],
+                'user'           => $notification['user'],
+                'recipient'      => $notification['recipient'],
+                'created'        => $notification['created']->format('d/m/Y à H:i'),
+                'updated'        => $updated,
+                'startDate'      => $startDate,
+                'endDate'        => $endDate,
+                'startHours'     => $startHours,
+                'endHours'       => $endHours,
+                'justification'  => $notification['justification'],
+                'status'         => $notification['status'],
+                'view'           => $notification['view'],
+                'type'           => $notification['type'],
+            ];
+        }
+        return [
+            'count'              => $count,
+            'list'               => $formattedActions,
+            'recipientFirstName' => $recipientFirstName,
+            'recipientLastName'  => $recipientLastName,
+            'userFirstName'     => $userFirstName,
+            'userLastName'       => $userLastName,
+        ];
+    }
+
+    /**
+     * @Rest\View()
+     * @Rest\Get("/notifications/count/{userID}")
+     */
+    public function refreshNotificationAction($userID)
+    {
+        $em = $this->get('doctrine.orm.entity_manager');
+        $countNotifications = $em->getRepository('ScufBundle:Action')->countNotificationByUser($userID);
+        return $countNotifications;
     }
 
     /**

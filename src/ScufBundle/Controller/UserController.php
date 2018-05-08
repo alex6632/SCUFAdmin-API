@@ -156,7 +156,7 @@ class UserController extends Controller
         $form->submit($request->request->all(), $clearMissing);
 
         if ($form->isValid()) {
-            if(!empty($user->getPlainPassword())) {
+            if(!empty($user->getPreviousPassword())) {
                 $encoder = $this->get('security.password_encoder');
                 // Check previous password
                 $previousPassword = $user->getPreviousPassword();
