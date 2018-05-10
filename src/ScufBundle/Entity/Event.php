@@ -60,6 +60,20 @@ class Event
     private $location;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="bg_color", type="string", length=255, nullable=true)
+     */
+    private $bg_color;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="border_color", type="string", length=255, nullable=true)
+     */
+    private $border_color;
+
+    /**
      * @ManyToMany(targetEntity="User", mappedBy="events")
      * @ORM\JoinColumn(nullable=true)
      */
@@ -221,6 +235,38 @@ class Event
     {
         // Remove ou removeElement
         $this->users->remove($user);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBgColor()
+    {
+        return $this->bg_color;
+    }
+
+    /**
+     * @param mixed $bg_color
+     */
+    public function setBgColor($bg_color)
+    {
+        $this->bg_color = $bg_color;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBorderColor()
+    {
+        return $this->border_color;
+    }
+
+    /**
+     * @param string $border_color
+     */
+    public function setBorderColor($border_color)
+    {
+        $this->border_color = $border_color;
     }
 }
 
