@@ -2,8 +2,8 @@
 
 namespace ScufBundle\Controller;
 
-use ScufBundle\Entity\Action;
-use ScufBundle\Form\ActionType;
+use ScufBundle\Entity\Event;
+use ScufBundle\Form\EventType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -11,194 +11,40 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use FOS\RestBundle\Controller\Annotations as Rest;
 
-class ActionController extends Controller
+class EventController extends Controller
 {
     /**
-     * @Rest\View()
-     * @Rest\Get("/actions/{type}/{userID}")
+     * @Rest\View(serializerGroups={"event"})
+     * @Rest\Get("/events/{userID}")
      */
-    public function listByUserAction($type, $userID)
+    public function listEventsAction($userID)
     {
         $em = $this->get('doctrine.orm.entity_manager');
-        $actions = $em->getRepository('ScufBundle:Action')->findActionByTypeAndUser($type, $userID);
-
-        if (empty($actions)) {
-            return [
-                'success' => false,
-                'message' => 'Aucune demande n\'a été soumise pour le moment !'
-            ];
-        }
-
-        $formattedActions = [];
-        foreach ($actions as $action) {
-            $updated = !is_null($action['updated']) ? $action['created']->format('d-m-Y') : "/";
-            $start = $action['start']->format('d-m-Y à H:i');
-            $startDate = $action['start']->format('d-m-Y');
-            $end = $action['end']->format('d-m-Y à H:i');
-            $endDate = $action['end']->format('d-m-Y');
-            $startHours = $action['start']->format('H:i');
-            $endHours = $action['end']->format('H:i');
-            $recipient = $em->getRepository('ScufBundle:User')->findOneById($action['recipient']);
-            $recipientFirstName = $recipient->getFirstname();
-            $recipientLastName = $recipient->getLastname();
-
-            $formattedActions[] = [
-                'success' => true,
-                'id' => $action['id'],
-                'user' => $action['user'],
-                'recipientFirstName' => $recipientFirstName,
-                'recipientLastName' => $recipientLastName,
-                'created' => $action['created']->format('d-m-Y à H:i'),
-                'updated' => $updated,
-                'start' => $start,
-                'startDate' => $startDate,
-                'end' => $end,
-                'endDate' => $endDate,
-                'startHours' => $startHours,
-                'endHours' => $endHours,
-                'justification' => $action['justification'],
-                'status' => $action['status'],
-            ];
-        }
-        return [
-            'success' => true,
-            'list' => $formattedActions,
-        ];
+        $events = $em->getRepository('ScufBundle:Event')->findByUser($userID);
+        //$userList = $em->getRepository('ScufBundle:Event')->findAll();
+        return $events;
     }
 
     /**
-     * @Rest\View()
-     * @Rest\Get("/notifications/{userID}")
+     * @Rest\View(serializerGroups={"event"}, statusCode=Response::HTTP_CREATED)
+     * @Rest\Post("/event/create/{userID}")
      */
-    public function notificationAction($userID)
+    public function createEventAction(Request $request, $userID)
     {
-        $em = $this->get('doctrine.orm.entity_manager');
-        $notifications = $em->getRepository('ScufBundle:Action')->findNotificationByUser($userID);
-        if (empty($notifications)) {
-            return $this->ActionNotFound();
-        }
-        $recipientFirstName = "";
-        $recipientLastName = "";
-        $userFirstName = "";
-        $userLastName = "";
-        $count = count($notifications);
-        $formattedActions = [];
-        foreach ($notifications as $notification) {
-            $updated = !is_null($notification['updated']) ? $notification['created']->format('d/m/Y à H:i') : "";
-            $startDate = $notification['start']->format('d/m/Y');
-            $endDate = $notification['end']->format('d/m/Y');
-            $startHours = $notification['start']->format('H:i');
-            $endHours = $notification['end']->format('H:i');
-            $recipient = $em->getRepository('ScufBundle:User')->findOneById($notification['recipient']);
-            $recipientFirstName = $recipient->getFirstname();
-            $recipientLastName = $recipient->getLastname();
-            $user = $em->getRepository('ScufBundle:User')->findOneById($notification['user']);
-            $userFirstName = $user->getFirstname();
-            $userLastName = $user->getLastname();
-
-            $formattedActions[] = [
-                'id'             => $notification['id'],
-                'user'           => $notification['user'],
-                'recipient'      => $notification['recipient'],
-                'created'        => $notification['created']->format('d/m/Y à H:i'),
-                'updated'        => $updated,
-                'startDate'      => $startDate,
-                'endDate'        => $endDate,
-                'startHours'     => $startHours,
-                'endHours'       => $endHours,
-                'justification'  => $notification['justification'],
-                'status'         => $notification['status'],
-                'view'           => $notification['view'],
-                'type'           => $notification['type'],
-            ];
-        }
-        return [
-            'count'              => $count,
-            'list'               => $formattedActions,
-            'recipientFirstName' => $recipientFirstName,
-            'recipientLastName'  => $recipientLastName,
-            'userFirstName'     => $userFirstName,
-            'userLastName'       => $userLastName,
-        ];
-    }
-
-    /**
-     * @Rest\View()
-     * @Rest\Get("/notifications/count/{userID}")
-     */
-    public function refreshNotificationAction($userID)
-    {
-        $em = $this->get('doctrine.orm.entity_manager');
-        $countNotifications = $em->getRepository('ScufBundle:Action')->countNotificationByUser($userID);
-        return $countNotifications;
-    }
-
-    /**
-     * @Rest\View(serializerGroups={"action"}, statusCode=Response::HTTP_CREATED)
-     * @Rest\Post("/action/create/{type}/{userID}")
-     */
-    public function createAction(Request $request, $type, $userID)
-    {
-        $action = new Action();
-        $form = $this->createForm(ActionType::class, $action);
+        $event = new Event();
+        $form = $this->createForm(EventType::class, $event);
         $form->submit($request->request->all());
 
         if ($form->isValid()) {
             $em = $this->get('doctrine.orm.entity_manager');
             $user = $em->getRepository('ScufBundle:User')->find($userID);
-
-            if($type == "leave" || $type == "rest") {
-                $superiorID = $em->getRepository('ScufBundle:User')->getSuperior($userID);
-                $recipient = $em->getRepository('ScufBundle:User')->find($superiorID[0][1]);
-                $action->setRecipient($recipient);
-            }
-            if($type == "rest") {
-                // Get start & end date of form
-                $startHours = substr($request->request->get('start'), 11, 2);
-                $startMinutes = substr($request->request->get('start'), 14, 2);
-                $endHours = substr($request->request->get('end'), 11, 2);
-                $endMinutes = substr($request->request->get('end'), 14, 2);
-
-                if($startMinutes == 00 || $startMinutes == 15 || $startMinutes == 30 || $startMinutes == 45) {
-                    if($endMinutes == 00 || $endMinutes == 15 || $endMinutes == 30 || $endMinutes == 45) {
-                        $start = ($startHours * 60) + $startMinutes;
-                        $end = ($endHours * 60) + $endMinutes;
-                    } else {
-                        throw new \Exception('L\'heure de fin est incorrecte !');
-                    }
-                } else {
-                    throw new \Exception('L\'heure de début est incorrecte !');
-                }
-
-                // Get rest value from database
-                $overtime = $em->getRepository('ScufBundle:User')->findOneById($userID)->getOvertime();
-                $coefficient = $em->getRepository('ScufBundle:Setting')->findOneBySlug('coeff')->getValue();
-                $restOwned = number_format($overtime * $coefficient, 2);
-
-                if($start < $end) {
-                    $restWanted = $end - $start;
-                    if($restWanted <= $restOwned) {
-                        $newOvertime = number_format(($restOwned - $restWanted) / $coefficient, 2);
-                        $user = $em->getRepository('ScufBundle:User')->findOneById($userID)->setOvertime($newOvertime);
-                    } else {
-                        throw new \Exception('Vous n\'avez pas cumulé assez d\'heures pour cette demande !');
-                    }
-                } else {
-                    throw new \Exception('La date de fin doit être ultérieure à la date de début !');
-                }
-            }
-            $now = new \DateTime('now');
-            $now->setTimezone(new \DateTimeZone('Europe/Paris'));
-            $action->setCreated($now);
-            $action->setStatus(2); //By default, status is "In progress"
-            $action->setView(0);
-            $action->setUser($user);
-
-            $em->persist($action);
+            $event->setUser($user);
+            $em->persist($event);
             $em->flush();
             $message = array(
-                'message' => 'Votre demande a bien été enregistrée. Vous recevrez une notification lorsque son statut évoluera.',
-                'action' => $action,
+                'type' => 'success',
+                'message' => 'L\'événement a bien été enregistré',
+                'event' => $event,
             );
             return $message;
         } else {

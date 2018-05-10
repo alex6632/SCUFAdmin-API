@@ -22,6 +22,10 @@ action:
     type: rest
     resource: ScufBundle\Controller\ActionController
 
+event:
+    type: rest
+    resource: ScufBundle\Controller\EventController
+
 auth-tokens:
     type: rest
     resource: ScufBundle\Controller\AuthTokenController
