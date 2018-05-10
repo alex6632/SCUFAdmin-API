@@ -117,8 +117,7 @@ class User implements UserInterface
     private $superior;
 
     /**
-     * @ManyToMany(targetEntity="Event", inversedBy="users", cascade={"remove"})
-     * @JoinTable(name="users_events")
+     * @OneToMany(targetEntity="Event", mappedBy="user", cascade={"remove"})
      * @ORM\JoinColumn(nullable=true)
      */
     private $event;

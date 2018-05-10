@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinTable;
 use Doctrine\ORM\Mapping\ManyToMany;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * Event
@@ -74,8 +75,8 @@ class Event
     private $border_color;
 
     /**
-     * @ManyToMany(targetEntity="User", mappedBy="events")
-     * @ORM\JoinColumn(nullable=true)
+     * @ManyToOne(targetEntity="User", inversedBy="events")
+     * @ORM\JoinColumn(name="user_id")
      */
     private $users;
 
