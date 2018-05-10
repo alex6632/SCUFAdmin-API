@@ -135,7 +135,6 @@ class User implements UserInterface
 
     public function __construct() {
         $this->access = new ArrayCollection();
-        $this->event = new ArrayCollection();
     }
 
     /**

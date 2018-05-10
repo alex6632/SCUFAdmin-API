@@ -2,9 +2,11 @@
 
 namespace ScufBundle\Form;
 
+use ScufBundle\Entity\User;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -16,18 +18,19 @@ class EventType extends AbstractType
     {
         $builder
             ->add('title', TextType::class)
-            ->add('all_day', IntegerType::class)
+            ->add('all_day', CheckboxType::class)
             ->add('start', DateTimeType::class, [
+                'format'  => 'yyyy-MM-dd HH:mm:ss',
                 'widget' => 'single_text',
-                'format'  => 'dd-MM-yyyy HH:mm'
             ])
             ->add('end', DateTimeType::class, [
                 'widget' => 'single_text',
-                'format' => 'dd-MM-yyyy HH:mm'
+                'format' => 'yyyy-MM-dd HH:mm:ss'
             ])
             ->add('location', TextType::class)
             ->add('bg_color', TextType::class)
-            ->add('border_color', TextType::class);
+            ->add('border_color', TextType::class)
+            ->add('user', EntityType::class, array('class' => User::class));
     }
 
     public function configureOptions(OptionsResolver $resolver)

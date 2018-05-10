@@ -23,11 +23,11 @@ ScufBundle\Entity\Event:
             groups: ['user', 'event']
         location:
             groups: ['user', 'event']
-        bgColor:
+        backgroundColor:
             groups: ['user', 'event']
         borderColor:
             groups: ['user', 'event']
-        users:
+        user:
             groups: ['event']
 
 ScufBundle\Entity\Action:

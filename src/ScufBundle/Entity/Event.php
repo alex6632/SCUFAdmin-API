@@ -2,10 +2,7 @@
 
 namespace ScufBundle\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\JoinTable;
-use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
@@ -63,9 +60,9 @@ class Event
     /**
      * @var string
      *
-     * @ORM\Column(name="bg_color", type="string", length=255, nullable=true)
+     * @ORM\Column(name="background_color", type="string", length=255, nullable=true)
      */
-    private $bg_color;
+    private $background_color;
 
     /**
      * @var string
@@ -78,11 +75,7 @@ class Event
      * @ManyToOne(targetEntity="User", inversedBy="events")
      * @ORM\JoinColumn(name="user_id")
      */
-    private $users;
-
-    public function __construct() {
-        $this->users = new ArrayCollection();
-    }
+    private $user;
 
     /**
      * Get id
@@ -217,41 +210,33 @@ class Event
     /**
      * @return mixed
      */
-    public function getUsers()
+    public function getUser()
     {
-        return $this->users;
+        return $this->user;
     }
 
     /**
      * @param mixed $user
      */
-    public function addUser($user)
+    public function setUser($user)
     {
-        if(!$this->users->contains($user)) {
-            $this->users->add($user);
-        }
-    }
-
-    public function removeUser($user)
-    {
-        // Remove ou removeElement
-        $this->users->remove($user);
+        $this->user = $user;
     }
 
     /**
      * @return mixed
      */
-    public function getBgColor()
+    public function getBackgroundColor()
     {
-        return $this->bg_color;
+        return $this->background_color;
     }
 
     /**
-     * @param mixed $bg_color
+     * @param mixed $background_color
      */
-    public function setBgColor($bg_color)
+    public function setBackgroundColor($background_color)
     {
-        $this->bg_color = $bg_color;
+        $this->background_color = $background_color;
     }
 
     /**
