@@ -5,7 +5,6 @@ namespace ScufBundle\Controller;
 use ScufBundle\Entity\Event;
 use ScufBundle\Form\EventType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -53,96 +52,80 @@ class EventController extends Controller
     }
 
     /**
-     * @Rest\View()
-     * @Rest\DELETE("/action/delete/{id}")
+     * @Rest\View(serializerGroups={"event"})
+     * @Rest\DELETE("/event/delete/{id}")
      */
-    public function deleteAction($id)
+    public function deleteEventAction($id)
     {
         $em = $this->get('doctrine.orm.entity_manager');
-        $action = $em->getRepository('ScufBundle:Action')->find($id);
+        $event = $em->getRepository('ScufBundle:Event')->find($id);
 
-        if (empty($action)) {
-            return $this->ActionNotFound();
+        if (empty($event)) {
+            return $this->EventNotFound();
         }
 
-        $em->remove($action);
+        $em->remove($event);
         $em->flush();
 
-        $msg = array(
-            'message'  => 'L\'action a bien été supprimée.',
-            'id' => $id,
-            'user' => $action->getUser()->getId()
+        $message = array(
+            'message'  => 'L\'événement a bien été supprimé.',
         );
-        return new JsonResponse($msg);
+        return $message;
     }
 
 
     /**
-     * @Rest\View()
-     * @Rest\Put("/action/update/{type}/{id}")
+     * @Rest\View(serializerGroups={"event"})
+     * @Rest\Put("/event/update/{id}")
      */
-    public function putAction(Request $request)
+    public function putEventAction(Request $request)
     {
-        return $this->editAction($request, true);
+        return $this->editEventAction($request, true);
     }
 
     /**
-     * @Rest\View()
-     * @Rest\Patch("action/update/{type}/{id}")
+     * @Rest\View(serializerGroups={"event"})
+     * @Rest\Patch("event/update/{id}")
      */
-    public function patchAction(Request $request)
+    public function patchEventAction(Request $request)
     {
-        return $this->editAction($request, false);
+        return $this->editEventAction($request, false);
     }
 
 
-    private function editAction(Request $request,  $clearMissing)
+    private function editEventAction(Request $request,  $clearMissing)
     {
         $em = $this->getDoctrine()->getManager();
-        $user = $em->getRepository('ScufBundle:User')->find($request->get('id'));
+        $event = $em->getRepository('ScufBundle:Event')->find($request->get('id'));
 
-        if (empty($user)) {
-            return $this->ActionNotFound();
+        if (empty($event)) {
+            return $this->EventNotFound();
         }
 
-        if($clearMissing) {
-            $options = ['validation_groups'=>['Default', 'FullUpdate']];
-        } else {
-            $options = [];
-        }
-
-        $form = $this->createForm(UserType::class, $user, $options);
+        $form = $this->createForm(EventType::class, $event);
         $form->submit($request->request->all(), $clearMissing);
 
         if ($form->isValid()) {
-            if(!empty($user->getPlainPassword())) {
-                $encoder = $this->get('security.password_encoder');
-                $encoded = $encoder->encodePassword($user, $user->getPlainPassword());
-                $user->setPassword($encoded);
-            }
-            $em->merge($user);
+            // HACK to set correct value to allDay field
+            $starTime = substr($request->request->get('start'), 11, 5);
+            $allDay = $starTime == '00:00' ? true : false;
+            $event->setAllDay($allDay);
+            $em->persist($event);
             $em->flush();
-            $msg = array(
-                'type'           => 'success',
-                'message'            => 'L\'utilisateur "'.$user->getFirstname().' ' .$user->getLastname() .'" a bien été édité.',
-                'firstname'      => $user->getFirstname(),
-                'lastname'       => $user->getLastname(),
-                'username'       => $user->getUsername(),
-                'role'           => $user->getRole(),
-                'superior'       => $user->getSuperior(),
-                'access'         => $user->getAccess(),
-                'hoursPlanified' => $user->getHoursPlanified(),
-                'id'             => $user->getId()
+            $message = array(
+                'type' => 'success',
+                'message' => 'L\'événement a bien été mis à jour',
+                'event' => $event,
             );
-            return new JsonResponse($msg);
+            return $message;
         } else {
             return $form;
         }
     }
 
-    private function ActionNotFound()
+    private function EventNotFound()
     {
-        throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('Aucune action trouvée.');
+        throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('Aucun événement trouvé.');
     }
 
 
