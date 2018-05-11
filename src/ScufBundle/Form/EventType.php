@@ -28,7 +28,7 @@ class EventType extends AbstractType
                 'format' => 'yyyy-MM-dd HH:mm:ss'
             ])
             ->add('location', TextType::class)
-            ->add('bg_color', TextType::class)
+            ->add('background_color', TextType::class)
             ->add('border_color', TextType::class)
             ->add('user', EntityType::class, array('class' => User::class));
     }
