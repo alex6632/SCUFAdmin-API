@@ -52,6 +52,43 @@ class EventController extends Controller
     }
 
     /**
+     * @Rest\View(serializerGroups={"event"}, statusCode=Response::HTTP_CREATED)
+     * @Rest\Post("/event/createFromNotification/{userID}/{actionID}")
+     */
+    public function createEventAndUpdateAction(Request $request, $userID, $actionID)
+    {
+        $event = new Event();
+        $form = $this->createForm(EventType::class, $event);
+        $form->submit($request->request->all());
+
+        if ($form->isValid()) {
+            $em = $this->get('doctrine.orm.entity_manager');
+
+            // 1. Update Action
+            $action = $em->getRepository('ScufBundle:Action')->findOneById($actionID);
+            $now = new \DateTime('now');
+            $now->setTimezone(new \DateTimeZone('Europe/Paris'));
+            $action->setUpdated($now);
+            $action->setView(1);
+            $action->setStatus(1); // Accepted status
+
+            // 2. Create Event
+            $user = $em->getRepository('ScufBundle:User')->find($userID);
+            $event->setUser($user);
+            $em->persist($event);
+            $em->flush();
+            $message = array(
+                'type' => 'success',
+                'message' => 'L\'événement a bien été enregistré',
+                'event' => $event,
+            );
+            return $message;
+        } else {
+            return $form;
+        }
+    }
+
+    /**
      * @Rest\View(serializerGroups={"event"})
      * @Rest\DELETE("/event/delete/{id}")
      */

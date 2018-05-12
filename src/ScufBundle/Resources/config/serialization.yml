@@ -50,6 +50,8 @@ ScufBundle\Entity\Action:
             groups: ['user', 'action']
         justification:
             groups: ['user', 'action']
+        location:
+            groups: ['user', 'action']
         user:
             groups: ['action']
         recipient:

@@ -31,7 +31,7 @@ class ActionController extends Controller
 
         $formattedActions = [];
         foreach ($actions as $action) {
-            $updated = !is_null($action['updated']) ? $action['created']->format('d-m-Y') : "/";
+            $updated = !is_null($action['updated']) ? $action['updated']->format('d-m-Y à H:i') : "/";
             $start = $action['start']->format('d-m-Y à H:i');
             $startDate = $action['start']->format('d-m-Y');
             $end = $action['end']->format('d-m-Y à H:i');
@@ -77,10 +77,6 @@ class ActionController extends Controller
         if (empty($notifications)) {
             return $this->ActionNotFound();
         }
-        $recipientFirstName = "";
-        $recipientLastName = "";
-        $userFirstName = "";
-        $userLastName = "";
         $count = count($notifications);
         $formattedActions = [];
         foreach ($notifications as $notification) {
@@ -89,6 +85,8 @@ class ActionController extends Controller
             $endDate = $notification['end']->format('d/m/Y');
             $startHours = $notification['start']->format('H:i');
             $endHours = $notification['end']->format('H:i');
+            $startUnformatted = $notification['start']->format('Y-m-d H:i:s');
+            $endUnformatted = $notification['end']->format('Y-m-d H:i:s');
             $recipient = $em->getRepository('ScufBundle:User')->findOneById($notification['recipient']);
             $recipientFirstName = $recipient->getFirstname();
             $recipientLastName = $recipient->getLastname();
@@ -97,28 +95,30 @@ class ActionController extends Controller
             $userLastName = $user->getLastname();
 
             $formattedActions[] = [
-                'id'             => $notification['id'],
-                'user'           => $notification['user'],
-                'recipient'      => $notification['recipient'],
-                'created'        => $notification['created']->format('d/m/Y à H:i'),
-                'updated'        => $updated,
-                'startDate'      => $startDate,
-                'endDate'        => $endDate,
-                'startHours'     => $startHours,
-                'endHours'       => $endHours,
-                'justification'  => $notification['justification'],
-                'status'         => $notification['status'],
-                'view'           => $notification['view'],
-                'type'           => $notification['type'],
+                'id'                 => $notification['id'],
+                'userID'             => $notification['user'],
+                'userFirstName'      => $userFirstName,
+                'userLastName'       => $userLastName,
+                'recipientFirstName' => $recipientFirstName,
+                'recipientLastName'  => $recipientLastName,
+                'created'            => $notification['created']->format('d/m/Y à H:i'),
+                'updated'            => $updated,
+                'startDate'          => $startDate,
+                'endDate'            => $endDate,
+                'startHours'         => $startHours,
+                'endHours'           => $endHours,
+                'startUnformatted'   => $startUnformatted,
+                'endUnformatted'     => $endUnformatted,
+                'justification'      => $notification['justification'],
+                'location'           => $notification['location'],
+                'status'             => $notification['status'],
+                'view'               => $notification['view'],
+                'type'               => $notification['type'],
             ];
         }
         return [
-            'count'              => $count,
-            'list'               => $formattedActions,
-            'recipientFirstName' => $recipientFirstName,
-            'recipientLastName'  => $recipientLastName,
-            'userFirstName'     => $userFirstName,
-            'userLastName'       => $userLastName,
+            'count'                  => $count,
+            'list'                   => $formattedActions,
         ];
     }
 
@@ -222,18 +222,18 @@ class ActionController extends Controller
         $em->remove($action);
         $em->flush();
 
-        $msg = array(
+        $message = array(
             'message'  => 'L\'action a bien été supprimée.',
             'id' => $id,
             'user' => $action->getUser()->getId()
         );
-        return new JsonResponse($msg);
+        return $message;
     }
 
 
     /**
-     * @Rest\View()
-     * @Rest\Put("/action/update/{type}/{id}")
+     * @Rest\View(serializerGroups={"action"})
+     * @Rest\Put("/action/update/{id}")
      */
     public function putAction(Request $request)
     {
@@ -241,54 +241,43 @@ class ActionController extends Controller
     }
 
     /**
-     * @Rest\View()
-     * @Rest\Patch("action/update/{type}/{id}")
+     * @Rest\View(serializerGroups={"action"})
+     * @Rest\Patch("action/update/{id}")
      */
     public function patchAction(Request $request)
     {
         return $this->editAction($request, false);
     }
 
-
     private function editAction(Request $request,  $clearMissing)
     {
         $em = $this->getDoctrine()->getManager();
-        $user = $em->getRepository('ScufBundle:User')->find($request->get('id'));
+        $action = $em->getRepository('ScufBundle:Action')->find($request->get('id'));
 
-        if (empty($user)) {
+        if (empty($action)) {
             return $this->ActionNotFound();
         }
 
-        if($clearMissing) {
-            $options = ['validation_groups'=>['Default', 'FullUpdate']];
-        } else {
-            $options = [];
-        }
-
-        $form = $this->createForm(UserType::class, $user, $options);
+        $form = $this->createForm(ActionType::class, $action);
         $form->submit($request->request->all(), $clearMissing);
 
         if ($form->isValid()) {
-            if(!empty($user->getPlainPassword())) {
-                $encoder = $this->get('security.password_encoder');
-                $encoded = $encoder->encodePassword($user, $user->getPlainPassword());
-                $user->setPassword($encoded);
-            }
-            $em->merge($user);
+            // ********************
+            // ** TEMPORARY *******
+            // ********************
+            $now = new \DateTime('now');
+            $now->setTimezone(new \DateTimeZone('Europe/Paris'));
+            $action->setUpdated($now);
+            $action->setView(1);
+            $action->setStatus(0); // Accepted status
+            // ********************
+            $em->persist($action);
             $em->flush();
-            $msg = array(
-                'type'           => 'success',
-                'message'            => 'L\'utilisateur "'.$user->getFirstname().' ' .$user->getLastname() .'" a bien été édité.',
-                'firstname'      => $user->getFirstname(),
-                'lastname'       => $user->getLastname(),
-                'username'       => $user->getUsername(),
-                'role'           => $user->getRole(),
-                'superior'       => $user->getSuperior(),
-                'access'         => $user->getAccess(),
-                'hoursPlanified' => $user->getHoursPlanified(),
-                'id'             => $user->getId()
+            $message = array(
+                'message'  => 'La notification a bien été mise à jour.',
+                'action' => $action
             );
-            return new JsonResponse($msg);
+            return $message;
         } else {
             return $form;
         }

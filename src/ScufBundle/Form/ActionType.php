@@ -42,7 +42,7 @@ class ActionType extends AbstractType
             ->add('user', EntityType::class, array('class' => User::class))
             ->add('recipient', EntityType::class, array('class' => User::class))
             ->add('justification', TextType::class)
-    ;
+            ->add('location', TextType::class);
     }
 
     public function configureOptions(OptionsResolver $resolver)

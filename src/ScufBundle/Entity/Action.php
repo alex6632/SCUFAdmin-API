@@ -65,6 +65,13 @@ class Action
     private $justification;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="location", type="string", length=255)
+     */
+    private $location;
+
+    /**
      * @var int
      *
      * @ORM\Column(name="status", type="integer")
@@ -240,6 +247,22 @@ class Action
     public function setJustification($justification)
     {
         $this->justification = $justification;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLocation()
+    {
+        return $this->location;
+    }
+
+    /**
+     * @param string $location
+     */
+    public function setLocation($location)
+    {
+        $this->location = $location;
     }
 
     /**
