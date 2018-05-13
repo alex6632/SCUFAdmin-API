@@ -29,17 +29,14 @@ class Week
      */
     private $number;
 
-    /**
-     * @ManyToOne(targetEntity="Setting", inversedBy="weeks")
-     * @ORM\JoinColumn(name="type_id", onDelete="SET NULL")
-     */
-    private $type;
+    private $from;
+    private $to;
 
     /**
-     * @ManyToOne(targetEntity="Section", inversedBy="weeks")
-     * @ORM\JoinColumn(name="section_id", onDelete="SET NULL")
+     * @ManyToOne(targetEntity="Setting", inversedBy="weeks")
+     * @ORM\JoinColumn(name="setting_id", onDelete="SET NULL")
      */
-    private $section;
+    private $setting;
 
     /**
      * @ManyToOne(targetEntity="User", inversedBy="weeks")
@@ -82,43 +79,19 @@ class Week
     }
 
     /**
-     * Set type.
-     *
-     * @param string $type
-     *
-     * @return Week
-     */
-    public function setType($type)
-    {
-        $this->type = $type;
-
-        return $this;
-    }
-
-    /**
-     * Get type.
-     *
-     * @return string
-     */
-    public function getType()
-    {
-        return $this->type;
-    }
-
-    /**
      * @return mixed
      */
-    public function getSection()
+    public function getSetting()
     {
-        return $this->section;
+        return $this->setting;
     }
 
     /**
-     * @param mixed $section
+     * @param mixed $setting
      */
-    public function setSection($section)
+    public function setSetting($setting)
     {
-        $this->section = $section;
+        $this->setting = $setting;
     }
 
     /**
@@ -135,5 +108,37 @@ class Week
     public function setUser($user)
     {
         $this->user = $user;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFrom()
+    {
+        return $this->from;
+    }
+
+    /**
+     * @param mixed $from
+     */
+    public function setFrom($from)
+    {
+        $this->from = $from;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTo()
+    {
+        return $this->to;
+    }
+
+    /**
+     * @param mixed $to
+     */
+    public function setTo($to)
+    {
+        $this->to = $to;
     }
 }

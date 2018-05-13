@@ -29,11 +29,6 @@ class Section
      */
     private $name;
 
-    /**
-     * @OneToMany(targetEntity="Week", mappedBy="section", cascade={"remove"})
-     */
-    private $week;
-
 
     /**
      * Get id.
@@ -67,21 +62,5 @@ class Section
     public function getName()
     {
         return $this->name;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getWeek()
-    {
-        return $this->week;
-    }
-
-    /**
-     * @param mixed $week
-     */
-    public function setWeek($week)
-    {
-        $this->week = $week;
     }
 }

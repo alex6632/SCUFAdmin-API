@@ -10,4 +10,16 @@ namespace ScufBundle\Repository;
  */
 class SettingRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findByGroupAndSlug($group, $slug)
+    {
+        $queryBuilder = $this->_em->createQueryBuilder('s')
+            ->select('s.id, s.title, s.value')
+            ->from('ScufBundle:Setting', 's')
+            ->where('s.group = :group AND s.slug = :slug')
+            ->setParameter('group', $group)
+            ->setParameter('slug', $slug);
+        $query = $queryBuilder->getQuery();
+        $settings = $query->getResult();
+        return $settings;
+    }
 }

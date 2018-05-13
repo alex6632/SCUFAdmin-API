@@ -30,6 +30,10 @@ section:
     type: rest
     resource: ScufBundle\Controller\SectionController
 
+week:
+    type: rest
+    resource: ScufBundle\Controller\WeekController
+
 auth-tokens:
     type: rest
     resource: ScufBundle\Controller\AuthTokenController

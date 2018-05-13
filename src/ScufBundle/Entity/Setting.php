@@ -58,6 +58,11 @@ class Setting
      */
     private $group;
 
+    /**
+     * @OneToMany(targetEntity="Week", mappedBy="setting", cascade={"remove"})
+     */
+    private $week;
+
 
     /**
      * Get id
@@ -171,6 +176,22 @@ class Setting
     public function setGroup($group)
     {
         $this->group = $group;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWeek()
+    {
+        return $this->week;
+    }
+
+    /**
+     * @param mixed $week
+     */
+    public function setWeek($week)
+    {
+        $this->week = $week;
     }
 }
 

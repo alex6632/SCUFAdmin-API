@@ -14,7 +14,7 @@ class SettingController extends Controller
 {
 
     /**
-     * @Rest\View()
+     * @Rest\View(serializerGroups={"setting"})
      * @Rest\Get("/settings")
      */
     public function listSettingAction()
@@ -25,17 +25,22 @@ class SettingController extends Controller
     }
 
     /**
-     * @Rest\View()
-     * @Rest\Get("/setting/{slug}")
+     * @Rest\View(serializerGroups={"setting"})
+     * @Rest\Get("/setting/{group}/{slug}", defaults={"slug"=""})
      */
-    public function oneSettingAction($slug)
+    public function oneSettingAction($group, $slug)
     {
         $em = $this->get('doctrine.orm.entity_manager');
-        $setting = $em->getRepository('ScufBundle:Setting')->findOneBySlug($slug);
-        if (empty($setting)) {
-            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('Le réglage n\'a pas pu être trouvé');
+        $settingsByGroup = $em->getRepository('ScufBundle:Setting')->findByGroup($group);
+        if (empty($group)) {
+            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('Le groupe de réglage n\'a pas pu être trouvé');
         }
-        return $setting;
+        if(empty($slug)) {
+            return $settingsByGroup;
+        } else {
+            $settingsByGroupAndSlug = $em->getRepository('ScufBundle:Setting')->findByGroupAndSlug($group, $slug);
+            return $settingsByGroupAndSlug;
+        }
     }
 
     /**

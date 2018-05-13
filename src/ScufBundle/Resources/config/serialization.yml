@@ -103,9 +103,32 @@ ScufBundle\Entity\AuthToken:
         user:
             groups: ['auth-token']
 
+ScufBundle\Entity\Setting:
+    attributes:
+        id:
+            groups: ['user', 'setting', 'week']
+        title:
+            groups: ['user', 'setting', 'week']
+        title:
+            groups: ['user', 'setting', 'week']
+        value:
+            groups: ['user', 'setting', 'week']
+        isInt:
+            groups: ['user', 'setting', 'week']
+        slug:
+            groups: ['user', 'setting', 'week']
+        group:
+            groups: ['user', 'setting', 'week']
+        week:
+            groups: ['setting']
+
 ScufBundle\Entity\Week:
     attributes:
         id:
+            groups: ['setting', 'user', 'week']
+        number:
+            groups: ['setting', 'user', 'week']
+        setting:
             groups: ['week']
         user:
             groups: ['week']
