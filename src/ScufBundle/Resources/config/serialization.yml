@@ -60,34 +60,36 @@ ScufBundle\Entity\Action:
 ScufBundle\Entity\User:
     attributes:
         id:
-            groups: ['user', 'access', 'event', 'auth-token']
+            groups: ['user', 'access', 'event', 'auth-token', 'week']
         username:
-            groups: ['user', 'access', 'event', 'auth-token']
+            groups: ['user', 'access', 'event', 'auth-token', 'week']
         firstname:
-            groups: ['user', 'access', 'event', 'auth-token']
+            groups: ['user', 'access', 'event', 'auth-token', 'week']
         lastname:
-            groups: ['user', 'access', 'event', 'auth-token']
+            groups: ['user', 'access', 'event', 'auth-token', 'week']
         plainPassword:
-            groups: ['user', 'access', 'event', 'auth-token']
+            groups: ['user', 'access', 'event', 'auth-token', 'week']
         hoursTodo:
-            groups: ['user', 'access', 'event', 'auth-token']
+            groups: ['user', 'access', 'event', 'auth-token', 'week']
         hoursDone:
-            groups: ['user', 'access', 'event', 'auth-token']
+            groups: ['user', 'access', 'event', 'auth-token', 'week']
         hoursPlanified:
-            groups: ['user', 'access', 'event', 'auth-token']
+            groups: ['user', 'access', 'event', 'auth-token', 'week']
         hoursPlanifiedByMe:
-            groups: ['user', 'access', 'event', 'auth-token']
+            groups: ['user', 'access', 'event', 'auth-token', 'week']
         overtime:
-            groups: ['user', 'access', 'event', 'auth-token']
+            groups: ['user', 'access', 'event', 'auth-token', 'week']
         role:
-            groups: ['user', 'access', 'event', 'auth-token']
+            groups: ['user', 'access', 'event', 'auth-token', 'week']
         superior:
-            groups: ['user', 'access', 'event', 'auth-token']
+            groups: ['user', 'access', 'event', 'auth-token', 'week']
         action:
             groups: ['user']
         event:
             groups: ['user']
         access:
+            groups: ['user']
+        week:
             groups: ['user']
 
 ScufBundle\Entity\AuthToken:
@@ -100,3 +102,10 @@ ScufBundle\Entity\AuthToken:
             groups: ['auth-token']
         user:
             groups: ['auth-token']
+
+ScufBundle\Entity\Week:
+    attributes:
+        id:
+            groups: ['week']
+        user:
+            groups: ['week']

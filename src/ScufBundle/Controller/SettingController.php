@@ -19,7 +19,7 @@ class SettingController extends Controller
      */
     public function listSettingAction()
     {
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->get('doctrine.orm.entity_manager');
         $settingList = $em->getRepository('ScufBundle:Setting')->findAll();
         return $settingList;
     }
@@ -31,9 +31,7 @@ class SettingController extends Controller
     public function oneSettingAction($slug)
     {
         $em = $this->get('doctrine.orm.entity_manager');
-
         $setting = $em->getRepository('ScufBundle:Setting')->findOneBySlug($slug);
-
         if (empty($setting)) {
             throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('Le réglage n\'a pas pu être trouvé');
         }

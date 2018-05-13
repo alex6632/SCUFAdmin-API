@@ -2,6 +2,7 @@
 
 namespace ScufBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OneToMany;
 
@@ -51,9 +52,11 @@ class Setting
     private $isInt;
 
     /**
-     * @OneToMany(targetEntity="Week", mappedBy="setting", cascade={"remove"})
+     * @var string
+     *
+     * @ORM\Column(name="group", type="string", length=255)
      */
-    private $week;
+    private $group;
 
 
     /**
@@ -155,19 +158,19 @@ class Setting
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getWeek()
+    public function getGroup()
     {
-        return $this->week;
+        return $this->group;
     }
 
     /**
-     * @param mixed $week
+     * @param string $group
      */
-    public function setWeek($week)
+    public function setGroup($group)
     {
-        $this->week = $week;
+        $this->group = $group;
     }
 }
 

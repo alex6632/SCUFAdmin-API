@@ -133,6 +133,11 @@ class User implements UserInterface
      */
     private $token;
 
+    /**
+     * @OneToMany(targetEntity="Week", mappedBy="user", cascade={"remove"})
+     */
+    private $week;
+
     public function __construct() {
         $this->access = new ArrayCollection();
     }
@@ -489,6 +494,22 @@ class User implements UserInterface
     public function setToken($token)
     {
         $this->token = $token;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWeek()
+    {
+        return $this->week;
+    }
+
+    /**
+     * @param mixed $week
+     */
+    public function setWeek($week)
+    {
+        $this->week = $week;
     }
 
     public function getRoles()

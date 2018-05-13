@@ -42,6 +42,12 @@ class Week
     private $section;
 
     /**
+     * @ManyToOne(targetEntity="User", inversedBy="weeks")
+     * @ORM\JoinColumn(name="user_id", onDelete="SET NULL")
+     */
+    private $user;
+
+    /**
      * Get id.
      *
      * @return int
@@ -113,5 +119,21 @@ class Week
     public function setSection($section)
     {
         $this->section = $section;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param mixed $user
+     */
+    public function setUser($user)
+    {
+        $this->user = $user;
     }
 }

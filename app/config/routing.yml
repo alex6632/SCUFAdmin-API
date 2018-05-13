@@ -26,6 +26,10 @@ event:
     type: rest
     resource: ScufBundle\Controller\EventController
 
+section:
+    type: rest
+    resource: ScufBundle\Controller\SectionController
+
 auth-tokens:
     type: rest
     resource: ScufBundle\Controller\AuthTokenController
