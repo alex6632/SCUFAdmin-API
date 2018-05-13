@@ -3,6 +3,7 @@
 namespace ScufBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * Setting
@@ -48,6 +49,11 @@ class Setting
      * @ORM\Column(name="is_int", type="boolean")
      */
     private $isInt;
+
+    /**
+     * @OneToMany(targetEntity="Week", mappedBy="setting", cascade={"remove"})
+     */
+    private $week;
 
 
     /**
@@ -146,6 +152,22 @@ class Setting
     public function getIsInt()
     {
         return $this->isInt;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWeek()
+    {
+        return $this->week;
+    }
+
+    /**
+     * @param mixed $week
+     */
+    public function setWeek($week)
+    {
+        $this->week = $week;
     }
 }
 
