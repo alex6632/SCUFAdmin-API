@@ -23,6 +23,8 @@ ScufBundle\Entity\Event:
             groups: ['user', 'event']
         location:
             groups: ['user', 'event']
+        validation:
+            groups: ['user', 'event']
         backgroundColor:
             groups: ['user', 'event']
         borderColor:

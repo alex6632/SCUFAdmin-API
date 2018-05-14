@@ -10,4 +10,32 @@ namespace ScufBundle\Repository;
  */
 class EventRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findByUserAndDay($userID, $validation, $now)
+    {
+        $queryBuilder = $this->_em->createQueryBuilder('e')
+            ->select('e.title, e.location, e.start, e.end')
+            ->from('ScufBundle:Event', 'e')
+            ->where('e.user = :id AND e.validation = :validation AND e.start LIKE :start')
+            ->setParameter('id', $userID)
+            ->setParameter('validation', $validation)
+            ->setParameter('start', $now.'%')
+            ->orderBy('e.start', 'ASC');
+        $query = $queryBuilder->getQuery();
+        $events = $query->getResult();
+        return $events;
+    }
+
+    public function findDaysInProgress($userID, $date)
+    {
+        $queryBuilder = $this->_em->createQueryBuilder('e')
+            ->select('DISTINCT CAST(e.start AS DATE) AS day')
+            ->from('ScufBundle:Event', 'e')
+            ->where('e.user = :id AND e.validation = 3 AND CAST(e.start AS DATE) <= :date')
+            ->setParameter('id', $userID)
+            ->setParameter('date', $date)
+            ->orderBy('e.start', 'ASC');
+        $query = $queryBuilder->getQuery();
+        $events = $query->getResult();
+        return $events;
+    }
 }

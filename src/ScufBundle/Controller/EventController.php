@@ -25,6 +25,64 @@ class EventController extends Controller
     }
 
     /**
+     * @Rest\View(serializerGroups={"event"})
+     * @Rest\Get("/events/in-progress/{userID}")
+     */
+    public function listDaysInProgressAction($userID)
+    {
+        $em = $this->get('doctrine.orm.entity_manager');
+        $now = new \DateTime('now', new \DateTimeZone('Europe/Paris'));
+        $nowFormatted = $now->format('Y-m-d');
+        $events = $em->getRepository('ScufBundle:Event')->findDaysInProgress($userID, $nowFormatted);
+        $eventsFormatted = [];
+
+        foreach($events as $event) {
+            $day = substr($event['day'], 8, 2);
+            $month = substr($event['day'], 5, 2);
+            $year = substr($event['day'], 0, 4);
+            $date = $day.'/'.$month.'/'.$year;
+            $eventsFormatted[] = [
+                'date' => $date,
+                'dateEN' => $event['day'],
+            ];
+        }
+        return $eventsFormatted;
+    }
+
+    /**
+     * @Rest\View(serializerGroups={"event"})
+     * @Rest\Get("/events/{userID}/{status}/{date}", defaults={"date"="now"})
+     */
+    public function listEventsByDayAction($userID, $status, $date)
+    {
+        $em = $this->get('doctrine.orm.entity_manager');
+
+        $now = ($date == 'now') ? new \DateTime('now', new \DateTimeZone('Europe/Paris')) : new \DateTime($date);
+        $nowFormatted = $now->format('Y-m-d');
+        $events = $em->getRepository('ScufBundle:Event')->findByUserAndDay($userID, $status, $nowFormatted);
+
+        $today = $now->format('d/m/Y');
+        $week = $now->format('W');
+        $eventsFormatted = [];
+        foreach($events as $event) {
+            $startHours = $event['start']->format('H:i');
+            $endHours = $event['end']->format('H:i');
+            $eventsFormatted[] = [
+                'id' => $event['id'],
+                'title' => $event['title'],
+                'location' => $event['location'],
+                'startHours' => $startHours,
+                'endHours' => $endHours,
+            ];
+        }
+        return [
+            'date' => $today,
+            'week' => $week,
+            'list' => $eventsFormatted,
+        ];
+    }
+
+    /**
      * @Rest\View(serializerGroups={"event"}, statusCode=Response::HTTP_CREATED)
      * @Rest\Post("/event/create/{userID}")
      */
@@ -38,6 +96,7 @@ class EventController extends Controller
             $em = $this->get('doctrine.orm.entity_manager');
             $user = $em->getRepository('ScufBundle:User')->find($userID);
             $event->setUser($user);
+            $event->setValidation(3);
             $em->persist($event);
             $em->flush();
             $message = array(

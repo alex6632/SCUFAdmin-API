@@ -72,6 +72,13 @@ class Event
     private $border_color;
 
     /**
+     * @var int
+     *
+     * @ORM\Column(name="validation", type="integer")
+     */
+    private $validation = 3;
+
+    /**
      * @ManyToOne(targetEntity="User", inversedBy="events")
      * @ORM\JoinColumn(name="user_id")
      */
@@ -205,6 +212,22 @@ class Event
     public function getLocation()
     {
         return $this->location;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValidation()
+    {
+        return $this->validation;
+    }
+
+    /**
+     * @param mixed $validation
+     */
+    public function setValidation($validation)
+    {
+        $this->validation = $validation;
     }
 
     /**
