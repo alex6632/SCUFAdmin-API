@@ -5,8 +5,8 @@ namespace ScufBundle\Controller;
 use ScufBundle\Entity\Week;
 use ScufBundle\Form\WeekType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use FOS\RestBundle\Controller\Annotations as Rest;
 
 class WeekController extends Controller
@@ -63,10 +63,8 @@ class WeekController extends Controller
             if($to < $from) {
                 return new \Exception('Error : the end value can\'t be inferior to the start value !');
             }
-            //$repeat = ($to - $from) + 1;
             if($to == 0) $to = $from;
             for($i=$from; $i<=$to; $i++) {
-                dump($i);
                 $repeaterWeek = new Week();
                 $repeaterWeek->setNumber($i);
                 $repeaterWeek->setSetting($setting);
@@ -87,62 +85,62 @@ class WeekController extends Controller
 
     /**
      * @Rest\View()
-     * @Rest\DELETE("/section/delete/{id}")
+     * @Rest\DELETE("/week/delete/{id}")
      */
-    public function deleteSectionAction(Request $request, $id)
+    public function deleteWeekAction(Request $request, $id)
     {
         $em = $this->get('doctrine.orm.entity_manager');
-        $section = $em->getRepository('ScufBundle:Section')->find($id);
-        if (empty($section)) {
-            return $this->SectionNotFound();
+        $week = $em->getRepository('ScufBundle:Week')->find($id);
+        if (empty($week)) {
+            return $this->WeekNotFound();
         }
-        $em->remove($section);
+        $em->remove($week);
         $em->flush();
 
         $message = array(
             'type' => 'success',
-            'message'  => 'La section a bien été supprimée.',
+            'message'  => 'La semaine a bien été supprimée.',
             'id' => $id
         );
         return $message;
     }
 
     /**
-     * @Rest\View()
-     * @Rest\Put("/section/update/{id}")
+     * @Rest\View(serializerGroups={"week"})
+     * @Rest\Put("/week/update/{id}")
      */
-    public function editSectionAction(Request $request)
+    public function editWeekAction(Request $request)
     {
-        return $this->editSection($request, true);
+        return $this->editWeek($request, true);
     }
 
     /**
-     * @Rest\View()
-     * @Rest\Patch("/section/update/{id}")
+     * @Rest\View(serializerGroups={"week"})
+     * @Rest\Patch("/week/update/{id}")
      */
-    public function patchSectionAction(Request $request)
+    public function patchWeekAction(Request $request)
     {
-        return $this->editSection($request, false);
+        return $this->editWeek($request, false);
     }
 
 
-    private function editSection(Request $request,  $clearMissing)
+    private function editWeek(Request $request,  $clearMissing)
     {
         $em = $this->get('doctrine.orm.entity_manager');
-        $section = $em->getRepository('ScufBundle:Section')->find($request->get('id'));
-        if (empty($section)) {
-            return $this->SectionNotFound();
+        $week = $em->getRepository('ScufBundle:Week')->find($request->get('id'));
+        if (empty($week)) {
+            return $this->WeekNotFound();
         }
-        $form = $this->createForm(SectionType::class, $section);
+        $form = $this->createForm(WeekType::class, $week);
         $form->submit($request->request->all(), $clearMissing);
 
         if ($form->isValid()) {
-            $em->persist($section);
+            $em->persist($week);
             $em->flush();
             $message = array(
                 'type'       => 'success',
-                'message'    => 'La section '.$section->getName().' a bien été éditée.',
-                'section'    => $section
+                'message'    => 'La semaine numéro '.$week->getNumber().' a bien été éditée.',
+                'week'       => $week
             );
             return $message;
         } else {
@@ -150,8 +148,8 @@ class WeekController extends Controller
         }
     }
 
-    private function SectionNotFound()
+    private function WeekNotFound()
     {
-        throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('La section n\'a pas pu être trouvée.');
+        throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('La semaine n\'a pas pu être trouvée.');
     }
 }
