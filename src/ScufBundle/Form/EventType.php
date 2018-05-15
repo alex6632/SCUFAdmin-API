@@ -28,11 +28,16 @@ class EventType extends AbstractType
                 'widget' => 'single_text',
                 'format' => 'yyyy-MM-dd HH:mm:ss'
             ])
-            ->add('validation', IntegerType::class)
             ->add('location', TextType::class)
             ->add('background_color', TextType::class)
             ->add('border_color', TextType::class)
-            ->add('user', EntityType::class, array('class' => User::class));
+            ->add('user', EntityType::class, array('class' => User::class))
+            ->add('validation', IntegerType::class)
+            ->add('confirm', CheckboxType::class)
+            ->add('partial_start', DateTimeType::class)
+            ->add('partial_end', DateTimeType::class)
+            ->add('justification', TextType::class)
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver)

@@ -51,15 +51,15 @@ class EventController extends Controller
 
     /**
      * @Rest\View(serializerGroups={"event"})
-     * @Rest\Get("/events/{userID}/{status}/{date}", defaults={"date"="now"})
+     * @Rest\Get("/events/{userID}/{date}", defaults={"date"="now"})
      */
-    public function listEventsByDayAction($userID, $status, $date)
+    public function listEventsByDayAction($userID, $date)
     {
         $em = $this->get('doctrine.orm.entity_manager');
 
         $now = ($date == 'now') ? new \DateTime('now', new \DateTimeZone('Europe/Paris')) : new \DateTime($date);
         $nowFormatted = $now->format('Y-m-d');
-        $events = $em->getRepository('ScufBundle:Event')->findByUserAndDay($userID, $status, $nowFormatted);
+        $events = $em->getRepository('ScufBundle:Event')->findByUserAndDay($userID, $nowFormatted);
 
         $today = $now->format('d/m/Y');
         $week = $now->format('W');
@@ -69,10 +69,13 @@ class EventController extends Controller
             $endHours = $event['end']->format('H:i');
             $eventsFormatted[] = [
                 'id' => $event['id'],
+                'userID' => $event['user'],
                 'title' => $event['title'],
+                'validation' => $event['validation'],
                 'location' => $event['location'],
                 'startHours' => $startHours,
                 'endHours' => $endHours,
+                'confirm' => $event['confirm'],
             ];
         }
         return [
@@ -96,7 +99,8 @@ class EventController extends Controller
             $em = $this->get('doctrine.orm.entity_manager');
             $user = $em->getRepository('ScufBundle:User')->find($userID);
             $event->setUser($user);
-            $event->setValidation(3);
+            $event->setValidation(0);
+            $event->setConfirm(0);
             $em->persist($event);
             $em->flush();
             $message = array(
@@ -212,6 +216,46 @@ class EventController extends Controller
                 'type' => 'success',
                 'message' => 'L\'événement a bien été mis à jour',
                 'event' => $event,
+            );
+            return $message;
+        } else {
+            return $form;
+        }
+    }
+
+    /**
+     * @Rest\View(serializerGroups={"event"})
+     * @Rest\Patch("event/multiple-update/{id}")
+     */
+    public function patchMultipleEventsAction(Request $request)
+    {
+        $em = $this->get('doctrine.orm.entity_manager');
+        $event = $em->getRepository('ScufBundle:Event')->find($request->get('id'));
+
+        if (empty($event)) {
+            return $this->EventNotFound();
+        }
+
+        $form = $this->createForm(EventType::class, $event);
+        $form->submit($request->request->all(), false);
+
+        if ($form->isValid()) {
+            // Get userID
+            $userID = $request->request->get('user');
+            //$validation = $request->request->get('validation');
+
+            // Update hours counter of user
+            $user = $em->getRepository('ScufBundle:User')->findOneById($userID);
+            $hoursDone = $user->getHoursDone();
+            $user->setHoursDone($hoursDone + 1);
+
+            $em->persist($event);
+            $em->flush();
+            $message = array(
+                'type' => 'success',
+                'message' => 'L\'événement a bien été mis à jour',
+                'id' => $event['id'],
+                'validation' => $event['validation'],
             );
             return $message;
         } else {

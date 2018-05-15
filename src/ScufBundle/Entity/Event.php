@@ -76,7 +76,35 @@ class Event
      *
      * @ORM\Column(name="validation", type="integer")
      */
-    private $validation = 3;
+    private $validation;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="confirm", type="boolean")
+     */
+    private $confirm;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="partial_start", type="datetime", nullable=true)
+     */
+    private $partial_start;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="partial_end", type="datetime", nullable=true)
+     */
+    private $partial_end;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="justification", type="string", length=255, nullable=true)
+     */
+    private $justification;
 
     /**
      * @ManyToOne(targetEntity="User", inversedBy="events")
@@ -276,6 +304,70 @@ class Event
     public function setBorderColor($border_color)
     {
         $this->border_color = $border_color;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getConfirm()
+    {
+        return $this->confirm;
+    }
+
+    /**
+     * @param mixed $confirm
+     */
+    public function setConfirm($confirm)
+    {
+        $this->confirm = $confirm;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPartialStart()
+    {
+        return $this->partial_start;
+    }
+
+    /**
+     * @param mixed $partial_start
+     */
+    public function setPartialStart($partial_start)
+    {
+        $this->partial_start = $partial_start;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getPartialEnd()
+    {
+        return $this->partial_end;
+    }
+
+    /**
+     * @param \DateTime $partial_end
+     */
+    public function setPartialEnd($partial_end)
+    {
+        $this->partial_end = $partial_end;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getJustification()
+    {
+        return $this->justification;
+    }
+
+    /**
+     * @param mixed $justification
+     */
+    public function setJustification($justification)
+    {
+        $this->justification = $justification;
     }
 }
 

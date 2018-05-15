@@ -23,14 +23,22 @@ ScufBundle\Entity\Event:
             groups: ['user', 'event']
         location:
             groups: ['user', 'event']
-        validation:
-            groups: ['user', 'event']
         backgroundColor:
             groups: ['user', 'event']
         borderColor:
             groups: ['user', 'event']
         user:
             groups: ['event']
+        validation:
+            groups: ['user', 'event']
+        confirm:
+            groups: ['user', 'event']
+        partialStart:
+            groups: ['user', 'event']
+        partialEnd:
+            groups: ['user', 'event']
+        justification:
+            groups: ['user', 'event']
 
 ScufBundle\Entity\Action:
     attributes:
