@@ -62,6 +62,7 @@ class EventController extends Controller
         $events = $em->getRepository('ScufBundle:Event')->findByUserAndDay($userID, $nowFormatted);
 
         $today = $now->format('d/m/Y');
+        $todayEN = $now->format('Y-m-d');
         $week = $now->format('W');
         $eventsFormatted = [];
         foreach($events as $event) {
@@ -80,6 +81,7 @@ class EventController extends Controller
         }
         return [
             'date' => $today,
+            'dateEN' => $todayEN,
             'week' => $week,
             'list' => $eventsFormatted,
         ];
@@ -244,8 +246,12 @@ class EventController extends Controller
             $userID = $request->request->get('user');
             //$validation = $request->request->get('validation');
 
+            // TODO : hours calcul
+
+            //dump($userID);
             // Update hours counter of user
             $user = $em->getRepository('ScufBundle:User')->findOneById($userID);
+            //dump($user);
             $hoursDone = $user->getHoursDone();
             $user->setHoursDone($hoursDone + 1);
 
@@ -254,8 +260,8 @@ class EventController extends Controller
             $message = array(
                 'type' => 'success',
                 'message' => 'L\'événement a bien été mis à jour',
-                'id' => $event['id'],
-                'validation' => $event['validation'],
+                'id' => $event->getId(),
+                'validation' => $event->getValidation(),
             );
             return $message;
         } else {
