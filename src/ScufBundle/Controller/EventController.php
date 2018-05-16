@@ -60,7 +60,6 @@ class EventController extends Controller
         $now = ($date == 'now') ? new \DateTime('now', new \DateTimeZone('Europe/Paris')) : new \DateTime($date);
         $nowFormatted = $now->format('Y-m-d');
         $events = $em->getRepository('ScufBundle:Event')->findByUserAndDay($userID, $nowFormatted);
-
         $today = $now->format('d/m/Y');
         $todayEN = $now->format('Y-m-d');
         $week = $now->format('W');
@@ -68,6 +67,8 @@ class EventController extends Controller
         foreach($events as $event) {
             $startHours = $event['start']->format('H:i');
             $endHours = $event['end']->format('H:i');
+            $partialStartHours = is_null($event['partial_start']) ? null : $event['partial_start']->format('H:i');
+            $partialEndHours = is_null($event['partial_end']) ? null : $event['partial_end']->format('H:i');
             $eventsFormatted[] = [
                 'id' => $event['id'],
                 'userID' => $event['user'],
@@ -76,6 +77,9 @@ class EventController extends Controller
                 'location' => $event['location'],
                 'startHours' => $startHours,
                 'endHours' => $endHours,
+                'partialStart' => $partialStartHours,
+                'partialEnd' => $partialEndHours,
+                'justification' => $event['justification'],
                 'confirm' => $event['confirm'],
             ];
         }

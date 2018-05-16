@@ -34,8 +34,14 @@ class EventType extends AbstractType
             ->add('user', EntityType::class, array('class' => User::class))
             ->add('validation', IntegerType::class)
             ->add('confirm', CheckboxType::class)
-            ->add('partial_start', DateTimeType::class)
-            ->add('partial_end', DateTimeType::class)
+            ->add('partial_start', DateTimeType::class, [
+                'widget' => 'single_text',
+                'format' => 'yyyy-MM-dd HH:mm:ss'
+            ])
+            ->add('partial_end', DateTimeType::class, [
+                'widget' => 'single_text',
+                'format' => 'yyyy-MM-dd HH:mm:ss'
+            ])
             ->add('justification', TextType::class)
         ;
     }
