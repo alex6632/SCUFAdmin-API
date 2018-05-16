@@ -71,28 +71,28 @@ class User implements UserInterface
     /**
      * @var int
      *
-     * @ORM\Column(name="hours_done", type="integer", nullable=true)
+     * @ORM\Column(name="hours_done", type="float", nullable=true)
      */
     private $hoursDone;
 
     /**
      * @var int
      *
-     * @ORM\Column(name="hours_planified", type="integer", nullable=true)
+     * @ORM\Column(name="hours_planified", type="float", nullable=true)
      */
     private $hoursPlanified;
 
     /**
      * @var int
      *
-     * @ORM\Column(name="hours_planified_by_me", type="integer", nullable=true)
+     * @ORM\Column(name="hours_planified_by_me", type="float", nullable=true)
      */
     private $hoursPlanifiedByMe;
 
     /**
      * @var int
      *
-     * @ORM\Column(name="overtime", type="integer", nullable=true)
+     * @ORM\Column(name="overtime", type="float", nullable=true)
      */
     private $overtime;
 

@@ -237,10 +237,18 @@ class UserController extends Controller
 
     /**
      * @Rest\View()
-     * @Rest\Get("/user/logout")
+     * @Rest\Get("/user/{userID}/week/{$number}")
      */
-    public function logoutAction()
+    public function getWeekHoursNumber($userID, $number)
     {
-        return new JsonResponse('logout');
+        $em = $this->get('doctrine.orm.entity_manager');
+
+        //$user = $em->getRepository('ScufBundle:Event')->findOneById($userID);
+        //$firstName = $user->getFirstname();
+        //$lastName = $user->getLastname();
+        $settingID = $em->getRepository('ScufBundle:Week')->findTypeByUserAndWeek($userID, $number);
+        $nbHours = $em->getRepository('ScufBundle:Setting')->findOneById($settingID)->getValue();
+
+        return $nbHours;
     }
 }

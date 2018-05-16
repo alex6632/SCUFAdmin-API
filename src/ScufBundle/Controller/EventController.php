@@ -51,7 +51,7 @@ class EventController extends Controller
 
     /**
      * @Rest\View(serializerGroups={"event"})
-     * @Rest\Get("/events/{userID}/{date}", defaults={"date"="now"})
+     * @Rest\Get("/user/{userID}/event/{date}", defaults={"date"="now"})
      */
     public function listEventsByDayAction($userID, $date)
     {
@@ -231,7 +231,7 @@ class EventController extends Controller
 
     /**
      * @Rest\View(serializerGroups={"event"})
-     * @Rest\Patch("event/multiple-update/{id}")
+     * @Rest\Patch("event/{id}/confirm")
      */
     public function patchMultipleEventsAction(Request $request)
     {
@@ -246,18 +246,18 @@ class EventController extends Controller
         $form->submit($request->request->all(), false);
 
         if ($form->isValid()) {
-            // Get userID
+            $validation = $request->get('validation');
+            if($validation == 1) {
+                $hoursDone = $this->GetHoursDone($event->getStart()->format('Y-m-d H:i:s'), $event->getEnd()->format('Y-m-d H:i:s'));
+            } else if($validation == 2) {
+                $hoursDone = $this->GetHoursDone($event->getPartialStart()->format('Y-m-d H:i:s'), $event->getPartialEnd()->format('Y-m-d H:i:s'));
+            } else {
+                $hoursDone = 0;
+            }
             $userID = $request->request->get('user');
-            //$validation = $request->request->get('validation');
-
-            // TODO : hours calcul
-
-            //dump($userID);
-            // Update hours counter of user
             $user = $em->getRepository('ScufBundle:User')->findOneById($userID);
-            //dump($user);
-            $hoursDone = $user->getHoursDone();
-            $user->setHoursDone($hoursDone + 1);
+            $totalHoursDone = $user->getHoursDone();
+            $user->setHoursDone($totalHoursDone + $hoursDone);
 
             $em->persist($event);
             $em->flush();
@@ -271,6 +271,34 @@ class EventController extends Controller
         } else {
             return $form;
         }
+    }
+
+    private function GetHoursDone($startDate, $endDate)
+    {
+        $startHours = substr($startDate, 11, 2);
+        $startMinutes = substr($startDate, 14, 2);
+        $endHours = substr($endDate, 11, 2);
+        $endMinutes = substr($endDate, 14, 2);
+
+        // Convert hours into minutes
+        if($startMinutes == 00 || $startMinutes == 15 || $startMinutes == 30 || $startMinutes == 45) {
+            if($endMinutes == 00 || $endMinutes == 15 || $endMinutes == 30 || $endMinutes == 45) {
+                $start = ($startHours * 60) + $startMinutes;
+                $end = ($endHours * 60) + $endMinutes;
+            } else {
+                throw new \Exception('L\'heure de fin est incorrecte !');
+            }
+        } else {
+            throw new \Exception('L\'heure de début est incorrecte !');
+        }
+
+        // Find delta between start & end date
+        if($start < $end) {
+            $hoursDone = ($end - $start) / 60;
+        } else {
+            throw new \Exception('La date de fin doit être ultérieure à la date de début !');
+        }
+        return $hoursDone;
     }
 
     private function EventNotFound()
