@@ -173,18 +173,13 @@ class ActionController extends Controller
                 // Get rest value from database
                 $overtime = $em->getRepository('ScufBundle:User')->findOneById($userID)->getOvertime();
                 $coefficient = $em->getRepository('ScufBundle:Setting')->findOneBySlug('coeff')->getValue();
-                $restOwned = number_format($overtime * $coefficient, 2);
-
-                if($start < $end) {
-                    $restWanted = $end - $start;
-                    if($restWanted <= $restOwned) {
-                        $newOvertime = number_format(($restOwned - $restWanted) / $coefficient, 2);
-                        $user = $em->getRepository('ScufBundle:User')->findOneById($userID)->setOvertime($newOvertime);
-                    } else {
-                        throw new \Exception('Vous n\'avez pas cumulé assez d\'heures pour cette demande !');
-                    }
-                } else {
+                $restOwned = number_format($overtime * 60 * $coefficient, 2);
+                if($start > $end) {
                     throw new \Exception('La date de fin doit être ultérieure à la date de début !');
+                }
+                $restWanted = $end - $start;
+                if($restWanted > $restOwned) {
+                    throw new \Exception('Vous n\'avez pas cumulé assez d\'heures pour cette demande !');
                 }
             }
             $now = new \DateTime('now');
@@ -269,7 +264,7 @@ class ActionController extends Controller
             $now->setTimezone(new \DateTimeZone('Europe/Paris'));
             $action->setUpdated($now);
             $action->setView(1);
-            $action->setStatus(0); // Accepted status
+            $action->setStatus(0); // Declined status
             // ********************
             $em->persist($action);
             $em->flush();

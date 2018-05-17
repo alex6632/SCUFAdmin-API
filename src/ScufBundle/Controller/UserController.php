@@ -48,10 +48,15 @@ class UserController extends Controller
         $superior = $user->getSuperior();
         $superiorName = $superior != null ? $superior->getFirstname()." ".$superior->getLastname() : "Aucun supérieur n'est rattaché.";
 
+        $now = new \DateTime('now', new \DateTimeZone('Europe/Paris'));
+        $week = $now->format('W');
+        $settingID = $em->getRepository('ScufBundle:User')->findTypeByUserAndWeek($id, $week);
+        $hoursTodoThisWeek = $em->getRepository('ScufBundle:Setting')->findOneById($settingID[0])->getValue();
+
         if (empty($user)) {
             throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('L\'utilisateur n\'a pas pu être trouvé');
         }
-        return [$user, $superiorName];
+        return [$user, $superiorName, $hoursTodoThisWeek];
     }
 
     /**

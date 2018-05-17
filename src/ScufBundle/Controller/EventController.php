@@ -122,7 +122,7 @@ class EventController extends Controller
 
     /**
      * @Rest\View(serializerGroups={"event"}, statusCode=Response::HTTP_CREATED)
-     * @Rest\Post("/event/createFromNotification/{userID}/{actionID}")
+         * @Rest\Post("/event/createFromNotification/{userID}/{actionID}")
      */
     public function createEventAndUpdateAction(Request $request, $userID, $actionID)
     {
@@ -141,9 +141,21 @@ class EventController extends Controller
             $action->setView(1);
             $action->setStatus(1); // Accepted status
 
-            // 2. Create Event
+            // 2. Update User overtime if rest is accepted
             $user = $em->getRepository('ScufBundle:User')->find($userID);
+            $type = $action->getType();
+            if($type == 'rest') {
+                $rest = $this->GetHoursDone($action->getStart()->format('Y-m-d H:i:s'), $action->getEnd()->format('Y-m-d H:i:s'));
+                $coefficient = $em->getRepository('ScufBundle:Setting')->findOneBySlug('coeff')->getValue();
+                $actualRest = number_format($user->getOvertime() * $coefficient, 2);
+                $newOvertime = number_format(($actualRest - $rest) / $coefficient, 2);
+                $user->setOvertime($newOvertime);
+            }
+
+            // 3. Create Event
             $event->setUser($user);
+            $event->setValidation(0);
+            $event->setConfirm(0);
             $em->persist($event);
             $em->flush();
             $message = array(
@@ -256,8 +268,8 @@ class EventController extends Controller
             }
             $userID = $request->request->get('user');
             $user = $em->getRepository('ScufBundle:User')->findOneById($userID);
-            $totalHoursDone = $user->getHoursDone();
-            $user->setHoursDone($totalHoursDone + $hoursDone);
+            $actualHoursDone = $user->getHoursDone();
+            $user->setHoursDone($actualHoursDone + $hoursDone);
 
             $em->persist($event);
             $em->flush();
