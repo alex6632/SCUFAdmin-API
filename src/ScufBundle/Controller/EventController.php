@@ -122,7 +122,7 @@ class EventController extends Controller
 
     /**
      * @Rest\View(serializerGroups={"event"}, statusCode=Response::HTTP_CREATED)
-         * @Rest\Post("/event/createFromNotification/{userID}/{actionID}")
+     * @Rest\Post("/event/createFromNotification/{userID}/{actionID}")
      */
     public function createEventAndUpdateAction(Request $request, $userID, $actionID)
     {
@@ -266,10 +266,19 @@ class EventController extends Controller
             } else {
                 $hoursDone = 0;
             }
+            // Update total hoursDone field
             $userID = $request->request->get('user');
             $user = $em->getRepository('ScufBundle:User')->findOneById($userID);
-            $actualHoursDone = $user->getHoursDone();
-            $user->setHoursDone($actualHoursDone + $hoursDone);
+            $actualTotalHoursDone = $user->getHoursDone();
+            $user->setHoursDone($actualTotalHoursDone + $hoursDone);
+
+            // Update week hoursDone field
+            $date = $event->getStart();
+            $weekValue = $date->format('W');
+            $weekArray = $em->getRepository('ScufBundle:User')->findTypeByUserAndWeek($userID, $weekValue);
+            $week = $em->getRepository('ScufBundle:Week')->findOneById($weekArray[0]['id']);
+            $actualWeekHoursDone = $week->getHoursDone();
+            $week->setHoursDone($actualWeekHoursDone + $hoursDone);
 
             $em->persist($event);
             $em->flush();

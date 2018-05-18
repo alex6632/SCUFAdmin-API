@@ -49,14 +49,16 @@ class UserController extends Controller
         $superiorName = $superior != null ? $superior->getFirstname()." ".$superior->getLastname() : "Aucun supérieur n'est rattaché.";
 
         $now = new \DateTime('now', new \DateTimeZone('Europe/Paris'));
-        $week = $now->format('W');
-        $settingID = $em->getRepository('ScufBundle:User')->findTypeByUserAndWeek($id, $week);
-        $hoursTodoThisWeek = $em->getRepository('ScufBundle:Setting')->findOneById($settingID[0])->getValue();
-
-        if (empty($user)) {
-            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('L\'utilisateur n\'a pas pu être trouvé');
-        }
-        return [$user, $superiorName, $hoursTodoThisWeek];
+        $weekValue = $now->format('W');
+        $week = $em->getRepository('ScufBundle:User')->findTypeByUserAndWeek($id, $weekValue);
+        $hoursTodoThisWeek = empty($week) ? 0 : $em->getRepository('ScufBundle:Setting')->findOneById($week[0]['settingID'])->getValue();
+        return [
+            'user' => $user,
+            'superiorName' => $superiorName,
+            'weekID' => empty($week) ? null : $week[0]['id'],
+            'hours_done' => empty($week) ? 0 : $week[0]['hours_done'],
+            'hoursTodoThisWeek' => intval($hoursTodoThisWeek),
+        ];
     }
 
     /**
@@ -93,14 +95,6 @@ class UserController extends Controller
             return $msg;
         } else {
             return $form;
-//            $msg = array(
-//                'type' => 'error',
-//                'debug' => '[Error] [create|user] See UserController/createUserAction',
-//                'msg' => 'Erreur lors de la création de l\'utilisateur. Veuillez réssayer.',
-//                'user' => $user,
-//                'form' => $form
-//            );
-//            return new JsonResponse($msg);
         }
     }
 
@@ -167,8 +161,6 @@ class UserController extends Controller
                 $previousPassword = $user->getPreviousPassword();
                 $isPasswordValid = $encoder->isPasswordValid($user, $previousPassword);
 
-                //$actualPassword = $em->getRepository('ScufBundle:User')->findOneById($request->get('id'))->getPassword();
-
                 if($isPasswordValid) {
                     if($user->getPlainPassword() == $user->getConfirmPassword()) {
                         $encoded = $encoder->encodePassword($user, $user->getPlainPassword());
@@ -214,29 +206,23 @@ class UserController extends Controller
         $searchMotor = $this->get('app.elastic_search_motor');
         $search = $request->query->get('search', '');
 
-        //if ($request->isXmlHttpRequest()) {
-            //die('ici');
-            if (strlen($search) >= ElasticSearchMotor::MIN_CHAR_USER) {
-                $searchResults = $searchMotor->searchUsers($search);
-                $result = count($searchResults) > 1 ? "utilisateurs trouvés" : "utilisateur trouvé";
+        if (strlen($search) >= ElasticSearchMotor::MIN_CHAR_USER) {
+            $searchResults = $searchMotor->searchUsers($search);
+            $result = count($searchResults) > 1 ? "utilisateurs trouvés" : "utilisateur trouvé";
+            $users[] = [
+                'result' => $result,
+                'id' => null,
+                'total' => count($searchResults),
+            ];
+            foreach ($searchResults as $user) {
                 $users[] = [
-                    'result' => $result,
-                    'id' => null,
-                    'total' => count($searchResults),
+                    'result' => $user->getFirstname().' '.$user->getLastname(),
+                    'id' => $user->getId(),
                 ];
-                foreach ($searchResults as $user) {
-                    $users[] = [
-                        'result' => $user->getFirstname().' '.$user->getLastname(),
-                        'id' => $user->getId(),
-                    ];
-                }
-            } else {
-                $users = [];
             }
-        /*} else {
-            die('no xml http request');
+        } else {
             $users = [];
-        }*/
+        }
         return new JsonResponse($users);
     }
 
@@ -248,12 +234,8 @@ class UserController extends Controller
     {
         $em = $this->get('doctrine.orm.entity_manager');
 
-        //$user = $em->getRepository('ScufBundle:Event')->findOneById($userID);
-        //$firstName = $user->getFirstname();
-        //$lastName = $user->getLastname();
         $settingID = $em->getRepository('ScufBundle:Week')->findTypeByUserAndWeek($userID, $number);
         $nbHours = $em->getRepository('ScufBundle:Setting')->findOneById($settingID)->getValue();
-
         return $nbHours;
     }
 }

@@ -7,6 +7,7 @@ use ScufBundle\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -18,6 +19,7 @@ class WeekType extends AbstractType
         $builder
             ->add('from', IntegerType::class)
             ->add('to', IntegerType::class)
+            ->add('hours_done', NumberType::class)
             ->add('setting', EntityType::class, array('class' => Setting::class))
             ->add('user', EntityType::class, array('class' => User::class));
     }

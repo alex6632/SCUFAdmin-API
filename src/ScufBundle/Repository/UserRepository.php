@@ -36,13 +36,13 @@ class UserRepository extends \Doctrine\ORM\EntityRepository
     public function findTypeByUserAndWeek($userID, $number)
     {
         $queryBuilder = $this->_em->createQueryBuilder('w')
-            ->select('(w.setting)')
+            ->select('w.id, (w.setting) AS settingID, w.hours_done')
             ->from('ScufBundle:Week', 'w')
             ->where('w.number = :number AND w.user = :user')
             ->setParameter('number', $number)
             ->setParameter('user', $userID);
         $query = $queryBuilder->getQuery();
-        $settingID = $query->getResult();
-        return $settingID;
+        $week = $query->getResult();
+        return $week;
     }
 }

@@ -69,6 +69,7 @@ class WeekController extends Controller
                 $repeaterWeek->setNumber($i);
                 $repeaterWeek->setSetting($setting);
                 $repeaterWeek->setUser($user);
+                $repeaterWeek->setHoursDone(0);
                 $em->persist($repeaterWeek);
             }
             $em->flush();

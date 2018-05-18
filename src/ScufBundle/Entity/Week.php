@@ -45,6 +45,13 @@ class Week
     private $user;
 
     /**
+     * @var float
+     *
+     * @ORM\Column(name="hours_done", type="float", nullable=true)
+     */
+    private $hours_done;
+
+    /**
      * Get id.
      *
      * @return int
@@ -140,5 +147,21 @@ class Week
     public function setTo($to)
     {
         $this->to = $to;
+    }
+
+    /**
+     * @return float
+     */
+    public function getHoursDone()
+    {
+        return $this->hours_done;
+    }
+
+    /**
+     * @param float $hours_done
+     */
+    public function setHoursDone($hours_done)
+    {
+        $this->hours_done = $hours_done;
     }
 }

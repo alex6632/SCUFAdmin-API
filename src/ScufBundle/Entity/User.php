@@ -69,28 +69,28 @@ class User implements UserInterface
     private $hoursTodo;
 
     /**
-     * @var int
+     * @var float
      *
      * @ORM\Column(name="hours_done", type="float", nullable=true)
      */
     private $hoursDone;
 
     /**
-     * @var int
+     * @var float
      *
      * @ORM\Column(name="hours_planified", type="float", nullable=true)
      */
     private $hoursPlanified;
 
     /**
-     * @var int
+     * @var float
      *
      * @ORM\Column(name="hours_planified_by_me", type="float", nullable=true)
      */
     private $hoursPlanifiedByMe;
 
     /**
-     * @var int
+     * @var float
      *
      * @ORM\Column(name="overtime", type="float", nullable=true)
      */

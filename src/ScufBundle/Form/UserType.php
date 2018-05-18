@@ -9,6 +9,7 @@ use ScufBundle\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -28,10 +29,10 @@ class UserType extends AbstractType
             ->add('firstname', TextType::class)
             ->add('lastname', TextType::class)
             ->add('hours_todo', IntegerType::class)
-            ->add('hours_done', IntegerType::class)
-            ->add('hours_planified', IntegerType::class)
-            ->add('hours_planified_by_me', IntegerType::class)
-            ->add('overtime', IntegerType::class)
+            ->add('hours_done', NumberType::class)
+            ->add('hours_planified', NumberType::class)
+            ->add('hours_planified_by_me', NumberType::class)
+            ->add('overtime', NumberType::class)
             ->add('role', IntegerType::class)
             ->add('access', EntityType::class, array(
                 'class' => Access::class,
