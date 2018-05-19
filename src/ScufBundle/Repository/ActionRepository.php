@@ -29,10 +29,23 @@ class ActionRepository extends \Doctrine\ORM\EntityRepository
             ->select('a.id, a.created, a.updated, a.start, a.end, a.status, a.justification, (a.user) AS user, (a.recipient) AS recipient, a.type, a.view, a.location')
             ->from('ScufBundle:Action', 'a')
             ->where('a.recipient = :id')
-            ->setParameter('id', $userID);
+            ->setParameter('id', $userID)
+            ->orderBy('a.created', 'ASC');
         $query = $queryBuilder->getQuery();
         $notifications = $query->getResult();
         return $notifications;
+    }
+
+    public function findNotificationInProgress($userID)
+    {
+        $queryBuilder = $this->_em->createQueryBuilder('a')
+            ->select('COUNT(a)')
+            ->from('ScufBundle:Action', 'a')
+            ->where('a.recipient = :id AND a.view = 0')
+            ->setParameter('id', $userID);
+        $query = $queryBuilder->getQuery();
+        $count = $query->getResult();
+        return $count;
     }
 
     public function countNotificationByUser($userID)

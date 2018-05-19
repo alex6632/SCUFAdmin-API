@@ -74,9 +74,13 @@ class ActionController extends Controller
     {
         $em = $this->get('doctrine.orm.entity_manager');
         $notifications = $em->getRepository('ScufBundle:Action')->findNotificationByUser($userID);
+        $count = count($notifications);
         if (empty($notifications)) {
-            return $this->ActionNotFound();
+            return [
+                'count' => $count,
+            ];
         }
+        $countInProgress = $em->getRepository('ScufBundle:Action')->findNotificationInProgress($userID);
         $count = count($notifications);
         $formattedActions = [];
         foreach ($notifications as $notification) {
@@ -117,8 +121,9 @@ class ActionController extends Controller
             ];
         }
         return [
-            'count'                  => $count,
-            'list'                   => $formattedActions,
+            'count' => $count,
+            'countInProgress' => intval($countInProgress[0][1]),
+            'list'  => $formattedActions,
         ];
     }
 
@@ -129,8 +134,8 @@ class ActionController extends Controller
     public function refreshNotificationAction($userID)
     {
         $em = $this->get('doctrine.orm.entity_manager');
-        $countNotifications = $em->getRepository('ScufBundle:Action')->countNotificationByUser($userID);
-        return $countNotifications;
+        $countNotifications = $em->getRepository('ScufBundle:Action')->findNotificationInProgress($userID);
+        return $countNotifications[0][1];
     }
 
     /**
