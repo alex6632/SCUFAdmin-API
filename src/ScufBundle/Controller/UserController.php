@@ -32,8 +32,24 @@ class UserController extends Controller
      */
     public function listEmployeesFromUserAction($id)
     {
+        return $this->recursiveSearchEmployees($id);
+    }
+
+    private function recursiveSearchEmployees($id)
+    {
+        $employeesList = [];
         $em = $this->get('doctrine.orm.entity_manager');
-        $employeesList = $em->getRepository('ScufBundle:User')->findBySuperior($id);
+        $employees = $em->getRepository('ScufBundle:User')->findBySuperior($id);
+        foreach($employees as $employee) {
+            $idSubLevel = $employee->getId();
+            $employeesList[] = [
+                'id' => $idSubLevel,
+                'firstname' => $employee->getFirstname(),
+                'lastname' => $employee->getLastname(),
+            ];
+            $employeesSubLevel = $em->getRepository('ScufBundle:User')->findBySuperior($idSubLevel);
+            if(!empty($employeesSubLevel)) $employeesList = array_merge( $employeesList, $this->recursiveSearchEmployees($idSubLevel));
+        }
         return $employeesList;
     }
 
