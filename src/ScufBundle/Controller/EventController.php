@@ -106,16 +106,27 @@ class EventController extends Controller
             $em = $this->get('doctrine.orm.entity_manager');
             $user = $em->getRepository('ScufBundle:User')->find($userID);
 
-            // Update user with the number of hours planified by superior
+            $type = $request->request->get('type');
             $nbHours = $this->GetHoursDone($request->request->get('start'), $request->request->get('end'));
-            $actualHoursPlanified = $user->getHoursPlanified();
-            $newHoursPlanified = $actualHoursPlanified + $nbHours;
-            $user->setHoursPlanified($newHoursPlanified);
-
+            /*
+             * ----------
+             * LEGEND ---
+             * ----------
+             * basic_me = event created by user himself
+             * basic_ext = event created by superior of user
+             */
+            if($type == "basic_me") {
+                $actualHoursPlanifiedByMe = $user->getHoursPlanifiedByMe();
+                $newHoursPlanifiedByMe = $actualHoursPlanifiedByMe + $nbHours;
+                $user->setHoursPlanifiedByMe($newHoursPlanifiedByMe);
+            } else {
+                $actualHoursPlanified = $user->getHoursPlanified();
+                $newHoursPlanified = $actualHoursPlanified + $nbHours;
+                $user->setHoursPlanified($newHoursPlanified);
+            }
             $event->setUser($user);
             $event->setValidation(0);
             $event->setConfirm(0);
-            $event->setType("basic");
             $em->persist($event);
             $em->flush();
             $message = array(
