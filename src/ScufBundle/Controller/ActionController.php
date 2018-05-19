@@ -39,9 +39,8 @@ class ActionController extends Controller
             $startHours = $action['start']->format('H:i');
             $endHours = $action['end']->format('H:i');
             $recipient = $em->getRepository('ScufBundle:User')->findOneById($action['recipient']);
-            $recipientFirstName = $recipient->getFirstname();
-            $recipientLastName = $recipient->getLastname();
-
+            $recipientFirstName = empty($em->getRepository('ScufBundle:User')->findOneById($action['recipient'])) ? "/" : $recipient->getFirstname();
+            $recipientLastName = empty($em->getRepository('ScufBundle:User')->findOneById($action['recipient'])) ? "/" : $recipient->getLastname();
             $formattedActions[] = [
                 'success' => true,
                 'id' => $action['id'],
