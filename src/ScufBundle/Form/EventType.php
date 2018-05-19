@@ -43,6 +43,7 @@ class EventType extends AbstractType
                 'format' => 'yyyy-MM-dd HH:mm:ss'
             ])
             ->add('justification', TextType::class)
+            ->add('type', TextType::class)
         ;
     }
 

@@ -39,6 +39,8 @@ ScufBundle\Entity\Event:
             groups: ['user', 'event']
         justification:
             groups: ['user', 'event']
+        type:
+            groups: ['user', 'event']
 
 ScufBundle\Entity\Action:
     attributes:

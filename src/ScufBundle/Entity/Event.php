@@ -113,6 +113,13 @@ class Event
     private $user;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="type", type="string", length=255, nullable=true)
+     */
+    private $type;
+
+    /**
      * Get id
      *
      * @return int
@@ -368,6 +375,22 @@ class Event
     public function setJustification($justification)
     {
         $this->justification = $justification;
+    }
+
+    /**
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param string $type
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
     }
 }
 

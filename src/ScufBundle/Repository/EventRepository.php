@@ -13,7 +13,7 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
     public function findByUserAndDay($userID, $now)
     {
         $queryBuilder = $this->_em->createQueryBuilder('e')
-            ->select('e.id, e.title, e.location, e.validation, e.start, e.end, e.partial_start, e.partial_end, e.justification, (e.user) AS user, e.confirm')
+            ->select('e.id, e.title, e.location, e.validation, e.start, e.end, e.partial_start, e.partial_end, e.justification, (e.user) AS user, e.confirm, e.type')
             ->from('ScufBundle:Event', 'e')
             ->where('e.user = :id AND e.start LIKE :start')
             ->setParameter('id', $userID)

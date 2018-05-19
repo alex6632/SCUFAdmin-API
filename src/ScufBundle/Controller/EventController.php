@@ -72,6 +72,7 @@ class EventController extends Controller
             $eventsFormatted[] = [
                 'id' => $event['id'],
                 'userID' => $event['user'],
+                'type' => $event['type'],
                 'title' => $event['title'],
                 'validation' => $event['validation'],
                 'location' => $event['location'],
@@ -104,9 +105,17 @@ class EventController extends Controller
         if ($form->isValid()) {
             $em = $this->get('doctrine.orm.entity_manager');
             $user = $em->getRepository('ScufBundle:User')->find($userID);
+
+            // Update user with the number of hours planified by superior
+            $nbHours = $this->GetHoursDone($request->request->get('start'), $request->request->get('end'));
+            $actualHoursPlanified = $user->getHoursPlanified();
+            $newHoursPlanified = $actualHoursPlanified + $nbHours;
+            $user->setHoursPlanified($newHoursPlanified);
+
             $event->setUser($user);
             $event->setValidation(0);
             $event->setConfirm(0);
+            $event->setType("basic");
             $em->persist($event);
             $em->flush();
             $message = array(
@@ -145,7 +154,7 @@ class EventController extends Controller
             $user = $em->getRepository('ScufBundle:User')->find($userID);
             $type = $action->getType();
             if($type == 'rest') {
-                $rest = $this->GetHoursDone($action->getStart()->format('Y-m-d H:i:s'), $action->getEnd()->format('Y-m-d H:i:s'));
+                $rest = $this->GetHoursDone($event->getStart()->format('Y-m-d H:i:s'), $event->getEnd()->format('Y-m-d H:i:s'));
                 $coefficient = $em->getRepository('ScufBundle:Setting')->findOneBySlug('coeff')->getValue();
                 $actualRest = number_format($user->getOvertime() * $coefficient, 2);
                 $newOvertime = number_format(($actualRest - $rest) / $coefficient, 2);
@@ -153,6 +162,17 @@ class EventController extends Controller
             }
 
             // 3. Create Event
+            switch($type) {
+                case 'hours':
+                    $event->setType('hours');
+                    break;
+                case 'rest':
+                    $event->setType('rest');
+                    break;
+                case 'leave':
+                    $event->setType('leave');
+                    break;
+            }
             $event->setUser($user);
             $event->setValidation(0);
             $event->setConfirm(0);
@@ -279,6 +299,16 @@ class EventController extends Controller
             $week = $em->getRepository('ScufBundle:Week')->findOneById($weekArray[0]['id']);
             $actualWeekHoursDone = $week->getHoursDone();
             $week->setHoursDone($actualWeekHoursDone + $hoursDone);
+
+            // Update User overtime if is hours type
+            $type = $request->request->get('type');
+            if($type == 'hours') {
+                $rest = $this->GetHoursDone($event->getStart()->format('Y-m-d H:i:s'), $event->getEnd()->format('Y-m-d H:i:s'));
+                $coefficient = $em->getRepository('ScufBundle:Setting')->findOneBySlug('coeff')->getValue();
+                $actualOvertime = $user->getOvertime();
+                $newOvertime = $actualOvertime + $rest;
+                $user->setOvertime($newOvertime);
+            }
 
             $em->persist($event);
             $em->flush();
