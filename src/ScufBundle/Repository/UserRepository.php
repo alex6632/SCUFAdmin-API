@@ -10,6 +10,17 @@ namespace ScufBundle\Repository;
  */
 class UserRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findAll()
+    {
+        $queryBuilder = $this->_em->createQueryBuilder('u')
+            ->select('u.id, u.firstname, u.lastname, u.username, u.role, (u.superior) AS superior, u.hoursTodo')
+            ->from('ScufBundle:User', 'u')
+            ->where('u.role != 42');
+        $query = $queryBuilder->getQuery();
+        $users = $query->getResult();
+        return $users;
+    }
+
     public function searchUser($term)
     {
         $queryBuilder = $this->_em->createQueryBuilder('u')
