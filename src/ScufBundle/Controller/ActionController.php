@@ -168,10 +168,20 @@ class ActionController extends Controller
                         $start = ($startHours * 60) + $startMinutes;
                         $end = ($endHours * 60) + $endMinutes;
                     } else {
-                        throw new \Exception('L\'heure de fin est incorrecte !');
+                        $message = array(
+                            'type' => 'error',
+                            'message' => 'L\'heure de fin est incorrecte !',
+                            'action' => $action,
+                        );
+                        return $message;
                     }
                 } else {
-                    throw new \Exception('L\'heure de début est incorrecte !');
+                    $message = array(
+                        'type' => 'error',
+                        'message' => 'L\'heure de début est incorrecte !',
+                        'action' => $action,
+                    );
+                    return $message;
                 }
 
                 // Get rest value from database
@@ -179,11 +189,21 @@ class ActionController extends Controller
                 $coefficient = $em->getRepository('ScufBundle:Setting')->findOneBySlug('coeff')->getValue();
                 $restOwned = number_format($overtime * 60 * $coefficient, 2);
                 if($start > $end) {
-                    throw new \Exception('La date de fin doit être ultérieure à la date de début !');
+                    $message = array(
+                        'type' => 'error',
+                        'message' => 'La date de fin doit être ultérieure à la date de début !',
+                        'action' => $action,
+                    );
+                    return $message;
                 }
                 $restWanted = $end - $start;
                 if($restWanted > $restOwned) {
-                    throw new \Exception('Vous n\'avez pas cumulé assez d\'heures pour cette demande !');
+                    $message = array(
+                        'type' => 'error',
+                        'message' => "Vous n'avez pas cumulé assez d'heures pour cette demande !",
+                        'action' => $action,
+                    );
+                    return $message;
                 }
             }
             $now = new \DateTime('now');
@@ -196,6 +216,7 @@ class ActionController extends Controller
             $em->persist($action);
             $em->flush();
             $message = array(
+                'type' => 'success',
                 'message' => 'Votre demande a bien été enregistrée. Vous recevrez une notification lorsque son statut évoluera.',
                 'action' => $action,
             );

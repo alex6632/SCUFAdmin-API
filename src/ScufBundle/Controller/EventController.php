@@ -213,8 +213,14 @@ class EventController extends Controller
             return $this->EventNotFound();
         }
 
-        // TODO: Remove hours of user
-
+        $type = $event->getType();
+        if($type == "basic_ext") {
+            $user = $em->getRepository('ScufBundle:Event')->findOneById($id)->getUser();
+            $nbHours = $this->GetHoursDone($event->getStart()->format('Y-m-d H:i:s'), $event->getEnd()->format('Y-m-d H:i:s'));
+            $actualHoursPlanified = $user->getHoursPlanified();
+            $newHoursPlanified = $actualHoursPlanified - $nbHours;
+            $user->setHoursPlanified($newHoursPlanified);
+        }
         $em->remove($event);
         $em->flush();
 
@@ -314,7 +320,7 @@ class EventController extends Controller
             if($validation == 1) {
                 $hoursDone = $this->GetHoursDone($event->getStart()->format('Y-m-d H:i:s'), $event->getEnd()->format('Y-m-d H:i:s'));
             } else if($validation == 2) {
-                $hoursDone = $this->GetHoursDone($event->getPartialStart()->format('Y-m-d H:i:s'), $event->getPartialEnd()->format('Y-m-d H:i:s'));
+                $hoursDone = $this->GetHoursDone($request->get('partial_start'), $request->get('partial_end'));
             } else {
                 $hoursDone = 0;
             }
@@ -335,10 +341,9 @@ class EventController extends Controller
             // Update User overtime if is hours type
             $type = $request->request->get('type');
             if($type == 'hours') {
-                $rest = $this->GetHoursDone($event->getStart()->format('Y-m-d H:i:s'), $event->getEnd()->format('Y-m-d H:i:s'));
-                $coefficient = $em->getRepository('ScufBundle:Setting')->findOneBySlug('coeff')->getValue();
+                //$rest = $this->GetHoursDone($event->getStart()->format('Y-m-d H:i:s'),$event->getEnd()->format('Y-m-d H:i:s'));
                 $actualOvertime = $user->getOvertime();
-                $newOvertime = $actualOvertime + $rest;
+                $newOvertime = $actualOvertime + $hoursDone;
                 $user->setOvertime($newOvertime);
             }
 
