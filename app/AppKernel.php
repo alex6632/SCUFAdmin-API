@@ -18,7 +18,7 @@ class AppKernel extends Kernel
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
             new Nelmio\CorsBundle\NelmioCorsBundle(),
             new FOS\RestBundle\FOSRestBundle(),
-            new FOS\ElasticaBundle\FOSElasticaBundle(),
+            //new FOS\ElasticaBundle\FOSElasticaBundle(),
             new AppBundle\AppBundle(),
             new ScufBundle\ScufBundle(),
         ];

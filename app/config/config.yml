@@ -109,34 +109,34 @@ fos_rest:
             'Symfony\Component\Security\Core\Exception\BadCredentialsException': 401
 
 # Fos Elastica configuration
-fos_elastica:
-    clients:
-        default: { host: localhost, port: 9200 }
-    indexes:
-        app:
-            settings:
-                index:
-                    analysis:
-                        analyzer:
-                            autocomplete_analyzer:
-                                type: custom
-                                tokenizer: lowercase
-                                filter: [autocomplete_tokenizer]
-                        filter:
-                            autocomplete_tokenizer:
-                                type: "nGram"
-                                min_gram: 3
-                                max_gram: 20
-            types:
-                user:
-                    properties:
-                        firstname: { type: text, analyzer: autocomplete_analyzer }
-                        lastname: { type: text, analyzer: autocomplete_analyzer }
-                        username: { type: text, analyzer: autocomplete_analyzer }
-                        role: { type: integer }
-                    persistence:
-                        driver: orm
-                        model: ScufBundle\Entity\User
-                        provider: ~
-                        listener: ~
-                        finder: ~
+#fos_elastica:
+#    clients:
+#        default: { host: ftp.cluster011.ovh.net, port: 9200 }
+#    indexes:
+#        app:
+#            settings:
+#                index:
+#                    analysis:
+#                        analyzer:
+#                            autocomplete_analyzer:
+#                                type: custom
+#                                tokenizer: lowercase
+#                                filter: [autocomplete_tokenizer]
+#                        filter:
+#                            autocomplete_tokenizer:
+#                                type: "nGram"
+#                                min_gram: 3
+#                                max_gram: 20
+#            types:
+#                user:
+#                    properties:
+#                        firstname: { type: text, analyzer: autocomplete_analyzer }
+#                        lastname: { type: text, analyzer: autocomplete_analyzer }
+#                        username: { type: text, analyzer: autocomplete_analyzer }
+#                        role: { type: integer }
+#                    persistence:
+#                        driver: orm
+#                        model: ScufBundle\Entity\User
+#                        provider: ~
+#                        listener: ~
+#                        finder: ~

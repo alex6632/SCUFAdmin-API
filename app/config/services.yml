@@ -34,10 +34,10 @@ services:
     # ----------------
 
     # Elasticsearch
-    app.elastic_search_motor:
-        public: true
-        class: ScufBundle\Service\ElasticSearchMotor
-        arguments: ['@fos_elastica.finder.app.user']
+#    app.elastic_search_motor:
+#        public: true
+#        class: ScufBundle\Service\ElasticSearchMotor
+#        arguments: ['@fos_elastica.finder.app.user']
 
     # Authentication
     auth_token_user_provider:
