@@ -213,6 +213,8 @@ class EventController extends Controller
             return $this->EventNotFound();
         }
 
+        // TODO: Remove hours of user
+
         $em->remove($event);
         $em->flush();
 
@@ -246,6 +248,7 @@ class EventController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
         $event = $em->getRepository('ScufBundle:Event')->find($request->get('id'));
+        $nbHoursBeforeEdit = $this->GetHoursDone($event->getStart()->format('Y-m-d H:i:s'), $event->getEnd()->format('Y-m-d H:i:s'));
 
         if (empty($event)) {
             return $this->EventNotFound();
@@ -255,6 +258,24 @@ class EventController extends Controller
         $form->submit($request->request->all(), $clearMissing);
 
         if ($form->isValid()) {
+            $type = $request->request->get('type');
+            $user = $em->getRepository('ScufBundle:Event')->findOneById($request->get('id'))->getUser();
+            $nbHoursAfterEdit = $this->GetHoursDone($request->request->get('start'), $request->request->get('end'));
+
+            if($type == "basic_ext") {
+                $actualHoursPlanified = $user->getHoursPlanified();
+                $newHoursPlanified = 0;
+
+                if($nbHoursBeforeEdit > $nbHoursAfterEdit) {
+                    $delta = $nbHoursBeforeEdit - $nbHoursAfterEdit;
+                    $newHoursPlanified = $actualHoursPlanified - $delta;
+                } else if($nbHoursBeforeEdit < $nbHoursAfterEdit) {
+                    $delta = $nbHoursAfterEdit - $nbHoursBeforeEdit;
+                    $newHoursPlanified = $actualHoursPlanified + $delta;
+                }
+                $user->setHoursPlanified($newHoursPlanified);
+            }
+
             // HACK to set correct value to allDay field
             $starTime = substr($request->request->get('start'), 11, 5);
             $allDay = $starTime == '00:00' ? true : false;
