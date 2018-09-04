@@ -44,6 +44,9 @@ class EventType extends AbstractType
             ])
             ->add('justification', TextType::class)
             ->add('type', TextType::class)
+            ->add('repeats', CheckboxType::class)
+            ->add('repeat_freq', IntegerType::class)
+            ->add('until', IntegerType::class)
         ;
     }
 

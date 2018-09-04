@@ -52,7 +52,7 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
                 ->where('e.id = :id')
                 ->setParameter('validation', $event['validation'])
                 ->setParameter('id', $event['id'])
-                 ->getQuery()
+                ->getQuery()
                 ->execute();
 
             // 2. Update User hours

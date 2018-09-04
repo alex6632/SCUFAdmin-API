@@ -61,14 +61,28 @@ class UserController extends Controller
     {
         $em = $this->get('doctrine.orm.entity_manager');
         $user = $em->getRepository('ScufBundle:User')->find($id);
+
         $superior = $user->getSuperior();
         $superiorName = $superior != null ? $superior->getFirstname()." ".$superior->getLastname() : "Aucun supérieur n'est rattaché.";
+
+        $role = $user->getRole();
+        if ($role === 42) {
+            return [
+                'role' => 'root',
+                'user' => $user,
+                'superiorName' => $superiorName,
+                'weekID' => null,
+                'hours_done' => 0,
+                'hoursTodoThisWeek' => 0,
+            ];
+        }
 
         $now = new \DateTime('now', new \DateTimeZone('Europe/Paris'));
         $weekValue = $now->format('W');
         $week = $em->getRepository('ScufBundle:User')->findTypeByUserAndWeek($id, $weekValue);
-        $hoursTodoThisWeek = empty($week) ? 0 : $em->getRepository('ScufBundle:Setting')->findOneById($week[0]['settingID'])->getValue();
+        $hoursTodoThisWeek = empty($week) ? 0 : $week[0]['hours'];
         return [
+            'role' => 'other',
             'user' => $user,
             'superiorName' => $superiorName,
             'weekID' => empty($week) ? null : $week[0]['id'],
@@ -98,6 +112,7 @@ class UserController extends Controller
 
             $em = $this->get('doctrine.orm.entity_manager');
             $user->setHoursPlanified(0);
+            $user->setHoursTodo(0);
             $user->setHoursDone(0);
             $user->setHoursPlanifiedByMe(0);
             $user->setOvertime(0);

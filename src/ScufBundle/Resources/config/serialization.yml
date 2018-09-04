@@ -41,6 +41,10 @@ ScufBundle\Entity\Event:
             groups: ['user', 'event']
         type:
             groups: ['user', 'event']
+#        repeats:
+#            groups: ['user', 'event', 'event-parent']
+#        repeatFreq:
+#            groups: ['user', 'event']
 
 ScufBundle\Entity\Action:
     attributes:
@@ -121,8 +125,6 @@ ScufBundle\Entity\Setting:
             groups: ['user', 'setting', 'week']
         title:
             groups: ['user', 'setting', 'week']
-        title:
-            groups: ['user', 'setting', 'week']
         value:
             groups: ['user', 'setting', 'week']
         isInt:
@@ -131,8 +133,6 @@ ScufBundle\Entity\Setting:
             groups: ['user', 'setting', 'week']
         group:
             groups: ['user', 'setting', 'week']
-        week:
-            groups: ['setting']
 
 ScufBundle\Entity\Week:
     attributes:
@@ -140,7 +140,7 @@ ScufBundle\Entity\Week:
             groups: ['setting', 'user', 'week']
         number:
             groups: ['setting', 'user', 'week']
-        setting:
-            groups: ['week']
+        hours:
+            groups: ['setting', 'user', 'week']
         user:
             groups: ['week']

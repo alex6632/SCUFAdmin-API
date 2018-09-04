@@ -26,20 +26,9 @@ class WeekController extends Controller
                 'message' => 'Aucune semaine n\'a été crée pour ce salarié !'
             ];
         }
-        $weeksTypeList = $em->getRepository('ScufBundle:Setting')->findByGroup('week');
-        $types = [];
-        foreach($weeksTypeList as $type) {
-            $types[] = [
-                'id' => $type->getId(),
-                'title' => $type->getTitle(),
-                'value' => $type->getValue(),
-                'slug' => $type->getSlug(),
-            ];
-        }
         return [
             'success' => true,
             'list' => $weeks,
-            'types' => $types,
         ];
     }
 
@@ -58,8 +47,9 @@ class WeekController extends Controller
         if ($form->isValid()) {
             $from = $request->request->get('from');
             $to = $request->request->get('to');
-            $setting = $week->getSetting();
-            $user = $week->getUser();
+            $nbHours = $week->getHours();
+            $userID = $week->getUser();
+            $user = $em->getRepository('ScufBundle:User')->find($userID);
             if($to < $from) {
                 return new \Exception('Error : the end value can\'t be inferior to the start value !');
             }
@@ -67,9 +57,10 @@ class WeekController extends Controller
             for($i=$from; $i<=$to; $i++) {
                 $repeaterWeek = new Week();
                 $repeaterWeek->setNumber($i);
-                $repeaterWeek->setSetting($setting);
-                $repeaterWeek->setUser($user);
+                $repeaterWeek->setHours($nbHours);
+                $repeaterWeek->setUser($userID);
                 $repeaterWeek->setHoursDone(0);
+                $user->setHoursTodo($user->getHoursTodo() + $nbHours);
                 $em->persist($repeaterWeek);
             }
             $em->flush();
@@ -96,6 +87,10 @@ class WeekController extends Controller
             return $this->WeekNotFound();
         }
         $em->remove($week);
+
+        // Update hoursTodo in User entity
+        $user = $em->getRepository('ScufBundle:User')->find($week->getUser());
+        $user->setHoursTodo($user->getHoursTodo() - $week->getHours());
         $em->flush();
 
         $message = array(
@@ -129,6 +124,8 @@ class WeekController extends Controller
     {
         $em = $this->get('doctrine.orm.entity_manager');
         $week = $em->getRepository('ScufBundle:Week')->find($request->get('id'));
+        $nbHoursBeforeEdit = $week->getHours();
+
         if (empty($week)) {
             return $this->WeekNotFound();
         }
@@ -136,6 +133,16 @@ class WeekController extends Controller
         $form->submit($request->request->all(), $clearMissing);
 
         if ($form->isValid()) {
+
+            // Update hoursTodo in User entity
+            $user = $em->getRepository('ScufBundle:User')->find($week->getUser());
+            $nbHoursAfterEdit = $request->request->get('hours');
+            if ($nbHoursBeforeEdit > $nbHoursAfterEdit) {
+                $user->setHoursTodo($user->getHoursTodo() - ($nbHoursBeforeEdit - $nbHoursAfterEdit));
+            } else {
+                $user->setHoursTodo($user->getHoursTodo() + ($nbHoursAfterEdit - $nbHoursBeforeEdit));
+            }
+
             $em->persist($week);
             $em->flush();
             $message = array(

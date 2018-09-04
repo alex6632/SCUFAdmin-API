@@ -20,7 +20,7 @@ class WeekType extends AbstractType
             ->add('from', IntegerType::class)
             ->add('to', IntegerType::class)
             ->add('hours_done', NumberType::class)
-            ->add('setting', EntityType::class, array('class' => Setting::class))
+            ->add('hours', NumberType::class)
             ->add('user', EntityType::class, array('class' => User::class));
     }
 

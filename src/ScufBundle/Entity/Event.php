@@ -120,6 +120,16 @@ class Event
     private $type;
 
     /**
+     * @ManyToOne(targetEntity="EventParent", inversedBy="events")
+     * @ORM\JoinColumn(name="parent_id")
+     */
+    private $event_parent;
+
+    private $repeats;
+    private $repeatFreq;
+    private $until;
+
+    /**
      * Get id
      *
      * @return int
@@ -391,6 +401,70 @@ class Event
     public function setType($type)
     {
         $this->type = $type;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEventParent()
+    {
+        return $this->event_parent;
+    }
+
+    /**
+     * @param mixed $event_parent
+     */
+    public function setEventParent($event_parent)
+    {
+        $this->event_parent = $event_parent;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRepeats()
+    {
+        return $this->repeats;
+    }
+
+    /**
+     * @param mixed $repeats
+     */
+    public function setRepeats($repeats)
+    {
+        $this->repeats = $repeats;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRepeatFreq()
+    {
+        return $this->repeatFreq;
+    }
+
+    /**
+     * @param mixed $repeatFreq
+     */
+    public function setRepeatFreq($repeatFreq)
+    {
+        $this->repeatFreq = $repeatFreq;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUntil()
+    {
+        return $this->until;
+    }
+
+    /**
+     * @param mixed $until
+     */
+    public function setUntil($until)
+    {
+        $this->until = $until;
     }
 }
 

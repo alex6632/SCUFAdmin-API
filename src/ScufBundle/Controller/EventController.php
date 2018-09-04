@@ -3,6 +3,7 @@
 namespace ScufBundle\Controller;
 
 use ScufBundle\Entity\Event;
+use ScufBundle\Entity\EventParent;
 use ScufBundle\Form\EventType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -106,33 +107,99 @@ class EventController extends Controller
             $em = $this->get('doctrine.orm.entity_manager');
             $user = $em->getRepository('ScufBundle:User')->find($userID);
 
+            // 0. Get all info necessary to save event
+            $title = $event->getTitle();
+            $all_day = $event->getAllDay();
+            $start = $event->getStart();
+            $end = $event->getEnd();
+            $location = $event->getLocation();
+            $bg = $event->getBackgroundColor();
+            $border = $event->getBorderColor();
+            $partial_start = $event->getPartialStart();
+            $partial_end = $event->getPartialEnd();
+            $justification = $event->getJustification();
             $type = $request->request->get('type');
-            $nbHours = $this->GetHoursDone($request->request->get('start'), $request->request->get('end'));
-            /*
-             * ----------
-             * LEGEND ---
-             * ----------
-             * basic_me = event created by user himself
-             * basic_ext = event created by superior of user
-             */
-            if($type == "basic_me") {
-                $actualHoursPlanifiedByMe = $user->getHoursPlanifiedByMe();
-                $newHoursPlanifiedByMe = $actualHoursPlanifiedByMe + $nbHours;
-                $user->setHoursPlanifiedByMe($newHoursPlanifiedByMe);
-            } else {
-                $actualHoursPlanified = $user->getHoursPlanified();
-                $newHoursPlanified = $actualHoursPlanified + $nbHours;
-                $user->setHoursPlanified($newHoursPlanified);
+
+
+            // 1. Create new instance of EventParent
+            //$field = $request->request->get('field');
+            $start_date = $event->getStart()->format('Y-m-d');
+            $weekday = date('N', strtotime($start_date));
+            $new_start_date = \DateTime::createFromFormat("Y-m-d", $start_date);
+            $start_time = \DateTime::createFromFormat("H:i:s", $event->getStart()->format('H:i:s'));
+            $end_time = \DateTime::createFromFormat("H:i:s", $event->getEnd()->format('H:i:s'));
+
+            // Define variable if event is not repeated
+            $repeats = 0;
+            $repeat_freq = 0;
+            $until = 1;
+
+            if ($request->request->get('repeats') == 1) {
+                $repeats = $request->request->get('repeats');
+                $repeat_freq = $request->request->get('repeat_freq');
+                $until = $request->request->get('until') !== 0 ? ($request->request->get('until')*7)/$repeat_freq : 365/$repeat_freq;
             }
-            $event->setUser($user);
-            $event->setValidation(0);
-            $event->setConfirm(0);
-            $em->persist($event);
+
+            $eventParent = new EventParent();
+            $eventParent->setWeekday($weekday);
+            $eventParent->setStartDate($new_start_date);
+            $eventParent->setStartTime($start_time);
+            $eventParent->setEndTime($end_time);
+            $eventParent->setRepeats($repeats);
+            $eventParent->setRepeatFreq($repeat_freq);
+            $em->persist($eventParent);
+
+            $nbHours = $this->GetHoursDone($request->request->get('start'), $request->request->get('end'));
+
+            // 2. Create new instance of Event based on EventParent
+            for ($i=0; $i<$until; $i++) {
+                $get_date = $start->format('Y-m-d');
+                $get_weekday = date('N', strtotime($get_date));
+
+                // We don't create event saturday or sunday
+                if ($get_weekday !== '6' && $get_weekday !== '7') {
+                    $event_repeater = new Event();
+                    /*
+                     * basic_me = event created by user himself
+                     * basic_ext = event created by superior of user
+                     */
+                    if($type == "basic_me") {
+                        $actualHoursPlanifiedByMe = $user->getHoursPlanifiedByMe();
+                        $newHoursPlanifiedByMe = $actualHoursPlanifiedByMe + $nbHours;
+                        $user->setHoursPlanifiedByMe($newHoursPlanifiedByMe);
+                    } else {
+                        $actualHoursPlanified = $user->getHoursPlanified();
+                        $newHoursPlanified = $actualHoursPlanified + $nbHours;
+                        $user->setHoursPlanified($newHoursPlanified);
+                    }
+                    $event_repeater->setTitle($title);
+                    $event_repeater->setAllDay($all_day);
+                    $event_repeater->setStart($start);
+                    $event_repeater->setEnd($end);
+                    $event_repeater->setLocation($location);
+                    $event_repeater->setBackgroundColor($bg);
+                    $event_repeater->setBorderColor($border);
+                    $event_repeater->setPartialStart($partial_start);
+                    $event_repeater->setPartialEnd($partial_end);
+                    $event_repeater->setJustification($justification);
+                    $event_repeater->setType($type);
+                    $event_repeater->setUser($user);
+                    $event_repeater->setValidation(0);
+                    $event_repeater->setConfirm(0);
+                    $event_repeater->setEventParent($eventParent);
+                    $em->persist($event_repeater);
+                }
+                // Update start and end date to repeat
+                $start_tmp = date("Y-m-d H:i:s", strtotime($start->format('Y-m-d H:i:s') . '+' . $repeat_freq . 'DAYS'));
+                $end_tmp = date("Y-m-d H:i:s", strtotime($end->format('Y-m-d H:i:s') . '+' . $repeat_freq . 'DAYS'));
+                $start = \DateTime::createFromFormat("Y-m-d H:i:s", $start_tmp);
+                $end = \DateTime::createFromFormat("Y-m-d H:i:s", $end_tmp);
+            }
             $em->flush();
+            $message_text = $until === 1 ? 'L\'événement a bien été enregistré' : 'Les événements ont bien été enregistrés';
             $message = array(
                 'type' => 'success',
-                'message' => 'L\'événement a bien été enregistré',
-                'event' => $event,
+                'message' => $message_text
             );
             return $message;
         } else {

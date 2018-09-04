@@ -33,10 +33,11 @@ class Week
     private $to;
 
     /**
-     * @ManyToOne(targetEntity="Setting", inversedBy="weeks")
-     * @ORM\JoinColumn(name="setting_id", onDelete="SET NULL")
+     * @var int
+     *
+     * @ORM\Column(name="hours", type="integer", nullable=true)
      */
-    private $setting;
+    private $hours;
 
     /**
      * @ManyToOne(targetEntity="User", inversedBy="weeks")
@@ -88,17 +89,17 @@ class Week
     /**
      * @return mixed
      */
-    public function getSetting()
+    public function getHours()
     {
-        return $this->setting;
+        return $this->hours;
     }
 
     /**
-     * @param mixed $setting
+     * @param mixed $hours
      */
-    public function setSetting($setting)
+    public function setHours($hours)
     {
-        $this->setting = $setting;
+        $this->hours = $hours;
     }
 
     /**

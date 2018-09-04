@@ -28,7 +28,6 @@ class UserType extends AbstractType
             ->add('confirm_password', TextType::class)
             ->add('firstname', TextType::class)
             ->add('lastname', TextType::class)
-            ->add('hours_todo', IntegerType::class)
             ->add('hours_done', NumberType::class)
             ->add('hours_planified', NumberType::class)
             ->add('hours_planified_by_me', NumberType::class)

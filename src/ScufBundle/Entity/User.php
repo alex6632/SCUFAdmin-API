@@ -64,7 +64,7 @@ class User implements UserInterface
     /**
      * @var int
      *
-     * @ORM\Column(name="hours_todo", type="integer")
+     * @ORM\Column(name="hours_todo", type="integer", nullable=true)
      */
     private $hoursTodo;
 
